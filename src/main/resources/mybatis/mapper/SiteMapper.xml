@@ -1,0 +1,794 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.SiteMapper">
+  <resultMap  type="com.iekun.ef.model.Site" id="BaseResultMap">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="SN" jdbcType="VARCHAR" property="sn" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="LONGITUDE" jdbcType="VARCHAR" property="longitude" />
+    <result column="LATITUDE" jdbcType="VARCHAR" property="latitude" />
+    <result column="ADDRESS" jdbcType="VARCHAR" property="address" />
+    <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    <result column="DELETE_FLAG" jdbcType="BIT" property="deleteFlag" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime" />
+    <result column="CITY_CODE" jdbcType="VARCHAR" property="cityCode" />
+    <result column="ZIP_CODE" jdbcType="VARCHAR" property="zipCode" />
+    <result column="PROVINCE_ID" jdbcType="BIGINT" property="province_id" />
+    <result column="CITY_ID" jdbcType="BIGINT" property="city_id" />
+    <result column="TOWN_ID" jdbcType="BIGINT" property="town_id" />
+    <result column="PROVINCE_NAME" jdbcType="VARCHAR" property="province_name" />
+    <result column="CITY_NAME" jdbcType="VARCHAR" property="city_name" />
+    <result column="TOWN_NAME" jdbcType="VARCHAR" property="town_name" />
+    
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, SN, NAME, LONGITUDE, LATITUDE, ADDRESS, REMARK, DELETE_FLAG, CREATE_TIME, UPDATE_TIME, 
+    CITY_CODE, ZIP_CODE, PROVINCE_ID, CITY_ID, TOWN_ID, PROVINCE_NAME, CITY_NAME, TOWN_NAME,LC,CI
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.SiteExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_site
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_site
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <select id="selectBySiteSn" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_site
+    where SN = #{sn,jdbcType=VARCHAR}
+  </select>
+  
+   <select id="selectSiteList"  resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_site
+    where DELETE_FLAG = 0
+    </select>
+    
+    <select id="selectAllSiteList"  resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_site
+    where 1=1
+    </select>
+    
+    <select id="selectSiteListByUserId"  parameterType="java.lang.Long" resultMap="BaseResultMap">
+    SELECT S.ID,
+       S.SN,
+			 S.NAME,
+			 S.LONGITUDE,
+			 S.LATITUDE,
+			 S.ADDRESS,
+			 S.REMARK,
+			 S.DELETE_FLAG,
+			 S.CREATE_TIME,
+			 S.UPDATE_TIME,
+			 S.CITY_CODE,
+			 S.ZIP_CODE,
+			 S.PROVINCE_ID,
+			 S.CITY_ID,
+			 S.TOWN_ID,
+			 S.PROVINCE_NAME,		 
+			 S.CITY_NAME,
+			 S.TOWN_NAME,
+			 S.LC,
+			 S.CI
+			from t_site S
+			LEFT JOIN t_site_user SU ON SU.SITE_ID = S.ID  
+			WHERE SU.USER_ID = #{userId,jdbcType=BIGINT} AND SU.DELETE_FLAG=0 AND S.DELETE_FLAG = 0
+			GROUP BY (ID)
+    </select>
+    
+   <!--  <select id="selectSiteList"  resultMap="BaseResultMap">
+    SELECT S.ID,
+       S.SN,
+			 S.NAME,
+			 S.LONGITUDE,
+			 S.LATITUDE,
+			 S.ADDRESS,
+			 S.REMARK,
+			 S.DELETE_FLAG,
+			 S.CREATE_TIME,
+			 S.UPDATE_TIME,
+			 S.CITY_CODE,
+			 S.ZIP_CODE,
+			 S.PROVINCE_ID,
+			 S.CITY_ID,
+			 S.TOWN_ID,
+			 S.PROVINCE_NAME,		 
+			 S.CITY_NAME,
+			 S.TOWN_NAME
+			from t_site S
+			WHERE S.DELETE_FLAG = 0
+			GROUP BY (ID)
+    </select> -->
+    
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_site
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.SiteExample">
+    delete from t_site
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.Site">
+    insert into t_site (ID, SN, NAME, 
+      LONGITUDE, LATITUDE, ADDRESS, 
+      REMARK, DELETE_FLAG, CREATE_TIME, 
+      UPDATE_TIME, CITY_CODE, ZIP_CODE, 
+      PROVINCE_ID, CITY_ID, TOWN_ID,
+      PROVINCE_NAME, CITY_NAME, TOWN_NAME,LC,CI
+      <!-- PROVINCE_NAME, CITY_NAME, TOWN_NAME -->
+      )
+    values (#{id,jdbcType=BIGINT}, #{sn,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{longitude,jdbcType=VARCHAR}, #{latitude,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, 
+      #{remark,jdbcType=VARCHAR}, #{deleteFlag,jdbcType=BIT}, #{createTime,jdbcType=VARCHAR}, 
+      #{updateTime,jdbcType=VARCHAR}, #{cityCode,jdbcType=VARCHAR}, #{zipCode,jdbcType=VARCHAR},
+      #{province_id,jdbcType=BIGINT},#{city_id,jdbcType=BIGINT},#{town_id,jdbcType=BIGINT},
+      #{province_name,jdbcType=VARCHAR},#{city_name,jdbcType=VARCHAR},#{town_name,jdbcType=VARCHAR},
+    #{LC,jdbcType=VARCHAR},#{CI,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.Site">
+    insert into t_site
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="sn != null">
+        SN,
+      </if>
+      <if test="name != null">
+        NAME,
+      </if>
+      <if test="longitude != null">
+        LONGITUDE,
+      </if>
+      <if test="latitude != null">
+        LATITUDE,
+      </if>
+      <if test="address != null">
+        ADDRESS,
+      </if>
+      <if test="remark != null">
+        REMARK,
+      </if>
+      <if test="deleteFlag != null">
+        DELETE_FLAG,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME,
+      </if>
+      <if test="cityCode != null">
+        CITY_CODE,
+      </if>
+      <if test="zipCode != null">
+        ZIP_CODE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="sn != null">
+        #{sn,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="longitude != null">
+        #{longitude,jdbcType=VARCHAR},
+      </if>
+      <if test="latitude != null">
+        #{latitude,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null">
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null">
+        #{deleteFlag,jdbcType=BIT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="cityCode != null">
+        #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="zipCode != null">
+        #{zipCode,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.SiteExample" resultType="java.lang.Integer">
+    select count(*) from t_site
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_site
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.sn != null">
+        SN = #{record.sn,jdbcType=VARCHAR},
+      </if>
+      <if test="record.name != null">
+        NAME = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.longitude != null">
+        LONGITUDE = #{record.longitude,jdbcType=VARCHAR},
+      </if>
+      <if test="record.latitude != null">
+        LATITUDE = #{record.latitude,jdbcType=VARCHAR},
+      </if>
+      <if test="record.address != null">
+        ADDRESS = #{record.address,jdbcType=VARCHAR},
+      </if>
+      <if test="record.remark != null">
+        REMARK = #{record.remark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deleteFlag != null">
+        DELETE_FLAG = #{record.deleteFlag,jdbcType=BIT},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.updateTime != null">
+        UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.cityCode != null">
+        CITY_CODE = #{record.cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.zipCode != null">
+        ZIP_CODE = #{record.zipCode,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_site
+    set ID = #{record.id,jdbcType=BIGINT},
+      SN = #{record.sn,jdbcType=VARCHAR},
+      NAME = #{record.name,jdbcType=VARCHAR},
+      LONGITUDE = #{record.longitude,jdbcType=VARCHAR},
+      LATITUDE = #{record.latitude,jdbcType=VARCHAR},
+      ADDRESS = #{record.address,jdbcType=VARCHAR},
+      REMARK = #{record.remark,jdbcType=VARCHAR},
+      DELETE_FLAG = #{record.deleteFlag,jdbcType=BIT},
+      CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      CITY_CODE = #{record.cityCode,jdbcType=VARCHAR},
+      ZIP_CODE = #{record.zipCode,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.Site">
+    update t_site
+    <set>
+      <if test="sn != null">
+        SN = #{sn,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="longitude != null">
+        LONGITUDE = #{longitude,jdbcType=VARCHAR},
+      </if>
+      <if test="latitude != null">
+        LATITUDE = #{latitude,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null">
+        ADDRESS = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null">
+        DELETE_FLAG = #{deleteFlag,jdbcType=BIT},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="cityCode != null">
+        CITY_CODE = #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="zipCode != null">
+        ZIP_CODE = #{zipCode,jdbcType=VARCHAR},
+      </if>
+      <if test="province_id != null">
+        PROVINCE_ID = #{province_id,jdbcType=BIGINT},
+      </if>
+      <if test=" city_id != null">
+        CITY_ID = #{city_id,jdbcType=BIGINT},
+      </if>
+       <if test="town_id != null">
+        TOWN_ID = #{town_id,jdbcType=BIGINT},
+      </if>
+      <if test="province_name != null">
+        PROVINCE_NAME = #{province_name,jdbcType=BIGINT},
+      </if>
+      <if test=" city_name != null">
+        CITY_NAME = #{city_name,jdbcType=BIGINT},
+      </if>
+       <if test="town_id != null">
+        TOWN_NAME = #{town_name,jdbcType=BIGINT},
+      </if>
+
+      <if test="LC != null">
+        LC = #{LC,jdbcType=BIGINT},
+      </if>
+      <if test="CI != null">
+        CI = #{CI,jdbcType=BIGINT},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.Site">
+    update t_site
+    set SN = #{sn,jdbcType=VARCHAR},
+      NAME = #{name,jdbcType=VARCHAR},
+      LONGITUDE = #{longitude,jdbcType=VARCHAR},
+      LATITUDE = #{latitude,jdbcType=VARCHAR},
+      ADDRESS = #{address,jdbcType=VARCHAR},
+      REMARK = #{remark,jdbcType=VARCHAR},
+      DELETE_FLAG = #{deleteFlag,jdbcType=BIT},
+      CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      CITY_CODE = #{cityCode,jdbcType=VARCHAR},
+      ZIP_CODE = #{zipCode,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+
+  <select id="selectSitesByAreaId" parameterType="java.util.Map" resultMap="BaseResultMap">
+    SELECT
+     <include refid="Base_Column_List" />
+    FROM t_site
+    WHERE
+        DELETE_FLAG=0
+    <if test="provinceId != null">
+      AND PROVINCE_ID = #{provinceId}
+    </if>
+    <if test="cityId != null">
+      AND CITY_ID = #{cityId}
+    </if>
+    <if test="townId != null">
+      AND TOWN_ID = #{townId}
+    </if>
+  </select>
+
+  <delete id="deleteSiteUserMapping" parameterType="java.lang.Long">
+      delete from t_site_user
+      where SITE_ID = #{siteId}
+  </delete>
+
+
+  <!-- <resultMap id="BaseResultMap" type="com.iekun.ef.model.Site">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="SN" jdbcType="VARCHAR" property="sn" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="LONGITUDE" jdbcType="VARCHAR" property="longitude" />
+    <result column="LATITUDE" jdbcType="VARCHAR" property="latitude" />
+    <result column="ADDRESS" jdbcType="VARCHAR" property="address" />
+    <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    <result column="DELETE_FLAG" jdbcType="BIT" property="deleteFlag" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime" />
+    <result column="CITY_CODE" jdbcType="VARCHAR" property="cityCode" />
+    <result column="ZIP_CODE" jdbcType="VARCHAR" property="zipCode" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, SN, NAME, LONGITUDE, LATITUDE, ADDRESS, REMARK, DELETE_FLAG, CREATE_TIME, UPDATE_TIME, 
+    CITY_CODE, ZIP_CODE
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.SiteExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_site
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_site
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_site
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.SiteExample">
+    delete from t_site
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.Site">
+    insert into t_site (ID, SN, NAME, 
+      LONGITUDE, LATITUDE, ADDRESS, 
+      REMARK, DELETE_FLAG, CREATE_TIME, 
+      UPDATE_TIME, CITY_CODE, ZIP_CODE
+      )
+    values (#{id,jdbcType=BIGINT}, #{sn,jdbcType=VARCHAR}, #{name,jdbcType=VARCHAR}, 
+      #{longitude,jdbcType=VARCHAR}, #{latitude,jdbcType=VARCHAR}, #{address,jdbcType=VARCHAR}, 
+      #{remark,jdbcType=VARCHAR}, #{deleteFlag,jdbcType=BIT}, #{createTime,jdbcType=VARCHAR}, 
+      #{updateTime,jdbcType=VARCHAR}, #{cityCode,jdbcType=VARCHAR}, #{zipCode,jdbcType=VARCHAR}
+      )
+  </insert>
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.Site">
+    insert into t_site
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="sn != null">
+        SN,
+      </if>
+      <if test="name != null">
+        NAME,
+      </if>
+      <if test="longitude != null">
+        LONGITUDE,
+      </if>
+      <if test="latitude != null">
+        LATITUDE,
+      </if>
+      <if test="address != null">
+        ADDRESS,
+      </if>
+      <if test="remark != null">
+        REMARK,
+      </if>
+      <if test="deleteFlag != null">
+        DELETE_FLAG,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME,
+      </if>
+      <if test="cityCode != null">
+        CITY_CODE,
+      </if>
+      <if test="zipCode != null">
+        ZIP_CODE,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="sn != null">
+        #{sn,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="longitude != null">
+        #{longitude,jdbcType=VARCHAR},
+      </if>
+      <if test="latitude != null">
+        #{latitude,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null">
+        #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null">
+        #{deleteFlag,jdbcType=BIT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="cityCode != null">
+        #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="zipCode != null">
+        #{zipCode,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.SiteExample" resultType="java.lang.Integer">
+    select count(*) from t_site
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_site
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.sn != null">
+        SN = #{record.sn,jdbcType=VARCHAR},
+      </if>
+      <if test="record.name != null">
+        NAME = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.longitude != null">
+        LONGITUDE = #{record.longitude,jdbcType=VARCHAR},
+      </if>
+      <if test="record.latitude != null">
+        LATITUDE = #{record.latitude,jdbcType=VARCHAR},
+      </if>
+      <if test="record.address != null">
+        ADDRESS = #{record.address,jdbcType=VARCHAR},
+      </if>
+      <if test="record.remark != null">
+        REMARK = #{record.remark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deleteFlag != null">
+        DELETE_FLAG = #{record.deleteFlag,jdbcType=BIT},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.updateTime != null">
+        UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.cityCode != null">
+        CITY_CODE = #{record.cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.zipCode != null">
+        ZIP_CODE = #{record.zipCode,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_site
+    set ID = #{record.id,jdbcType=BIGINT},
+      SN = #{record.sn,jdbcType=VARCHAR},
+      NAME = #{record.name,jdbcType=VARCHAR},
+      LONGITUDE = #{record.longitude,jdbcType=VARCHAR},
+      LATITUDE = #{record.latitude,jdbcType=VARCHAR},
+      ADDRESS = #{record.address,jdbcType=VARCHAR},
+      REMARK = #{record.remark,jdbcType=VARCHAR},
+      DELETE_FLAG = #{record.deleteFlag,jdbcType=BIT},
+      CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      CITY_CODE = #{record.cityCode,jdbcType=VARCHAR},
+      ZIP_CODE = #{record.zipCode,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.Site">
+    update t_site
+    <set>
+      <if test="sn != null">
+        SN = #{sn,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="longitude != null">
+        LONGITUDE = #{longitude,jdbcType=VARCHAR},
+      </if>
+      <if test="latitude != null">
+        LATITUDE = #{latitude,jdbcType=VARCHAR},
+      </if>
+      <if test="address != null">
+        ADDRESS = #{address,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null">
+        DELETE_FLAG = #{deleteFlag,jdbcType=BIT},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="cityCode != null">
+        CITY_CODE = #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="zipCode != null">
+        ZIP_CODE = #{zipCode,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.Site">
+    update t_site
+    set SN = #{sn,jdbcType=VARCHAR},
+      NAME = #{name,jdbcType=VARCHAR},
+      LONGITUDE = #{longitude,jdbcType=VARCHAR},
+      LATITUDE = #{latitude,jdbcType=VARCHAR},
+      ADDRESS = #{address,jdbcType=VARCHAR},
+      REMARK = #{remark,jdbcType=VARCHAR},
+      DELETE_FLAG = #{deleteFlag,jdbcType=BIT},
+      CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      CITY_CODE = #{cityCode,jdbcType=VARCHAR},
+      ZIP_CODE = #{zipCode,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=BIGINT}
+  </update> -->
+</mapper>

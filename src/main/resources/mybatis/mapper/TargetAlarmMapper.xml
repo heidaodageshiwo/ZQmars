@@ -1,0 +1,1319 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.TargetAlarmMapper">
+  <resultMap  type="com.iekun.ef.model.TargetAlarm" id="BaseResultMap">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="RULE_NAME" jdbcType="VARCHAR" property="ruleName" />
+    <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+    <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+    <result column="IMSI" jdbcType="VARCHAR" property="imsi" />
+    <result column="IMEI" jdbcType="VARCHAR" property="imei" />
+    <result column="STMSI" jdbcType="VARCHAR" property="stmsi" />
+    <result column="MAC" jdbcType="VARCHAR" property="mac" />
+    <result column="LATYPE" jdbcType="VARCHAR" property="latype" />
+    <result column="INDICATION" jdbcType="TINYINT" property="indication" />
+    <result column="REALTIME" jdbcType="BIT" property="realtime" />
+    <result column="CAPTURE_TIME" jdbcType="VARCHAR" property="captureTime" />
+    <result column="RARTA" jdbcType="BIGINT" property="rarta" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="CITY_NAME" jdbcType="VARCHAR" property="cityName" />
+    <result column="BAND" jdbcType="VARCHAR" property="band" />
+    <result column="OPERATOR" jdbcType="VARCHAR" property="operator" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, SITE_NAME, DEVICE_SN, IMSI, IMEI, STMSI, MAC, LATYPE, INDICATION, REALTIME, CAPTURE_TIME, 
+    RARTA, CREATE_TIME, CITY_NAME, BAND, OPERATOR
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.TargetAlarmExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_target_alarm
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_target_alarm
+    where IS_READ = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <select id="selectAllUnReadAlarm"  resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+     from t_target_alarm
+    where ID = 0
+  </select>
+  
+  <select id="getTargetAlarms" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+     from t_target_alarm
+      where IS_READ = 0 AND
+               IMSI = #{imsi}
+             AND (INDICATION = 1 OR INDICATION = 3)	
+			 AND CREATE_TIME >= #{startDate} 
+             ORDER BY CREATE_TIME 
+   </select>
+   
+    <select id="getAreaTargetAlarms" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+     from t_target_alarm
+      where IS_READ = 0 AND
+               CITY_CODE = #{cityCode}
+             AND (INDICATION = 2 OR INDICATION = 3)	
+			 AND CREATE_TIME >= #{startDate} 
+			 GROUP BY IMSI,DEVICE_SN
+             ORDER BY CREATE_TIME 
+   </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_target_alarm
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.TargetAlarmExample">
+    delete from t_target_alarm
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.TargetAlarm">
+    insert into t_target_alarm (ID, SITE_NAME, DEVICE_SN, 
+      IMSI, IMEI, STMSI, 
+      MAC, LATYPE, INDICATION, 
+      REALTIME, CAPTURE_TIME, RARTA, 
+      CREATE_TIME, CITY_NAME, CITY_CODE, BAND, 
+      OPERATOR, SITE_SN, IS_READ)
+    values (#{id,jdbcType=BIGINT}, #{siteName,jdbcType=VARCHAR}, #{deviceSn,jdbcType=VARCHAR}, 
+      #{imsi,jdbcType=VARCHAR}, #{imei,jdbcType=VARCHAR}, #{stmsi,jdbcType=VARCHAR}, 
+      #{mac,jdbcType=VARCHAR}, #{latype,jdbcType=VARCHAR}, #{indication,jdbcType=TINYINT}, 
+      #{realtime,jdbcType=BIT}, #{captureTime,jdbcType=VARCHAR}, #{rarta,jdbcType=BIGINT}, 
+      #{createTime,jdbcType=VARCHAR}, #{cityName,jdbcType=VARCHAR}, #{cityCode,jdbcType=VARCHAR},#{band,jdbcType=VARCHAR}, 
+      #{operator,jdbcType=VARCHAR},  #{siteSn,jdbcType=VARCHAR}, #{isRead,jdbcType=BIT})
+  </insert>
+  
+  <insert id="batchInsertTargetAlarm" parameterType="List">  
+       insert into t_target_alarm (SITE_NAME, DEVICE_SN, 
+      IMSI, IMEI, STMSI, 
+      MAC, LATYPE, INDICATION, 
+      REALTIME, CAPTURE_TIME, RARTA, 
+      CREATE_TIME, CITY_NAME, CITY_CODE, BAND, 
+      OPERATOR, SITE_SN, IS_READ)
+    values
+    <foreach collection="list" item="targetAlarm" index="index" separator="," >  
+      (#{targetAlarm.siteName,jdbcType=VARCHAR}, #{targetAlarm.deviceSn,jdbcType=VARCHAR}, 
+      #{targetAlarm.imsi,jdbcType=VARCHAR}, #{targetAlarm.imei,jdbcType=VARCHAR}, #{targetAlarm.stmsi,jdbcType=VARCHAR}, 
+      #{targetAlarm.mac,jdbcType=VARCHAR}, #{targetAlarm.latype,jdbcType=VARCHAR}, #{targetAlarm.indication,jdbcType=TINYINT}, 
+      #{targetAlarm.realtime,jdbcType=BIT}, #{targetAlarm.captureTime,jdbcType=VARCHAR}, #{targetAlarm.rarta,jdbcType=BIGINT}, 
+      #{targetAlarm.createTime,jdbcType=VARCHAR}, #{targetAlarm.cityName,jdbcType=VARCHAR}, #{targetAlarm.cityCode,jdbcType=VARCHAR},#{targetAlarm.band,jdbcType=VARCHAR}, 
+      #{targetAlarm.operator,jdbcType=VARCHAR},  #{targetAlarm.siteSn,jdbcType=VARCHAR}, #{targetAlarm.isRead,jdbcType=BIT})  
+     </foreach>  
+   </insert>
+  
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.TargetAlarm">
+    insert into t_target_alarm
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="siteName != null">
+        SITE_NAME,
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN,
+      </if>
+      <if test="imsi != null">
+        IMSI,
+      </if>
+      <if test="imei != null">
+        IMEI,
+      </if>
+      <if test="stmsi != null">
+        STMSI,
+      </if>
+      <if test="mac != null">
+        MAC,
+      </if>
+      <if test="latype != null">
+        LATYPE,
+      </if>
+      <if test="indication != null">
+        INDICATION,
+      </if>
+      <if test="realtime != null">
+        REALTIME,
+      </if>
+      <if test="captureTime != null">
+        CAPTURE_TIME,
+      </if>
+      <if test="rarta != null">
+        RARTA,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="cityName != null">
+        CITY_NAME,
+      </if>
+      <if test="band != null">
+        BAND,
+      </if>
+      <if test="operator != null">
+        OPERATOR,
+      </if>
+      <if test="phoneSection != null">
+        PHONE_SECTION,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="siteName != null">
+        #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="imsi != null">
+        #{imsi,jdbcType=VARCHAR},
+      </if>
+      <if test="imei != null">
+        #{imei,jdbcType=VARCHAR},
+      </if>
+      <if test="stmsi != null">
+        #{stmsi,jdbcType=VARCHAR},
+      </if>
+      <if test="mac != null">
+        #{mac,jdbcType=VARCHAR},
+      </if>
+      <if test="latype != null">
+        #{latype,jdbcType=VARCHAR},
+      </if>
+      <if test="indication != null">
+        #{indication,jdbcType=TINYINT},
+      </if>
+      <if test="realtime != null">
+        #{realtime,jdbcType=BIT},
+      </if>
+      <if test="captureTime != null">
+        #{captureTime,jdbcType=VARCHAR},
+      </if>
+      <if test="rarta != null">
+        #{rarta,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="cityName != null">
+        #{cityName,jdbcType=VARCHAR},
+      </if>
+      <if test="band != null">
+        #{band,jdbcType=VARCHAR},
+      </if>
+      <if test="operator != null">
+        #{operator,jdbcType=VARCHAR},
+      </if>
+      <if test="phoneSection != null">
+        #{phoneSection,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.TargetAlarmExample" resultType="java.lang.Integer">
+    select count(*) from t_target_alarm
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_target_alarm
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.siteName != null">
+        SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deviceSn != null">
+        DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="record.imsi != null">
+        IMSI = #{record.imsi,jdbcType=VARCHAR},
+      </if>
+      <if test="record.imei != null">
+        IMEI = #{record.imei,jdbcType=VARCHAR},
+      </if>
+      <if test="record.stmsi != null">
+        STMSI = #{record.stmsi,jdbcType=VARCHAR},
+      </if>
+      <if test="record.mac != null">
+        MAC = #{record.mac,jdbcType=VARCHAR},
+      </if>
+      <if test="record.latype != null">
+        LATYPE = #{record.latype,jdbcType=VARCHAR},
+      </if>
+      <if test="record.indication != null">
+        INDICATION = #{record.indication,jdbcType=TINYINT},
+      </if>
+      <if test="record.realtime != null">
+        REALTIME = #{record.realtime,jdbcType=BIT},
+      </if>
+      <if test="record.captureTime != null">
+        CAPTURE_TIME = #{record.captureTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.rarta != null">
+        RARTA = #{record.rarta,jdbcType=BIGINT},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.cityName != null">
+        CITY_NAME = #{record.cityName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.band != null">
+        BAND = #{record.band,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operator != null">
+        OPERATOR = #{record.operator,jdbcType=VARCHAR},
+      </if>
+      <if test="record.phoneSection != null">
+        PHONE_SECTION = #{record.phoneSection,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_target_alarm
+    set ID = #{record.id,jdbcType=BIGINT},
+      SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      IMSI = #{record.imsi,jdbcType=VARCHAR},
+      IMEI = #{record.imei,jdbcType=VARCHAR},
+      STMSI = #{record.stmsi,jdbcType=VARCHAR},
+      MAC = #{record.mac,jdbcType=VARCHAR},
+      LATYPE = #{record.latype,jdbcType=VARCHAR},
+      INDICATION = #{record.indication,jdbcType=TINYINT},
+      REALTIME = #{record.realtime,jdbcType=BIT},
+      CAPTURE_TIME = #{record.captureTime,jdbcType=VARCHAR},
+      RARTA = #{record.rarta,jdbcType=BIGINT},
+      CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      CITY_NAME = #{record.cityName,jdbcType=VARCHAR},
+      BAND = #{record.band,jdbcType=VARCHAR},
+      OPERATOR = #{record.operator,jdbcType=VARCHAR},
+      PHONE_SECTION = #{record.phoneSection,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.TargetAlarm">
+    update t_target_alarm
+    <set>
+      <if test="siteName != null">
+        SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="imsi != null">
+        IMSI = #{imsi,jdbcType=VARCHAR},
+      </if>
+      <if test="imei != null">
+        IMEI = #{imei,jdbcType=VARCHAR},
+      </if>
+      <if test="stmsi != null">
+        STMSI = #{stmsi,jdbcType=VARCHAR},
+      </if>
+      <if test="mac != null">
+        MAC = #{mac,jdbcType=VARCHAR},
+      </if>
+      <if test="latype != null">
+        LATYPE = #{latype,jdbcType=VARCHAR},
+      </if>
+      <if test="indication != null">
+        INDICATION = #{indication,jdbcType=TINYINT},
+      </if>
+      <if test="realtime != null">
+        REALTIME = #{realtime,jdbcType=BIT},
+      </if>
+      <if test="captureTime != null">
+        CAPTURE_TIME = #{captureTime,jdbcType=VARCHAR},
+      </if>
+      <if test="rarta != null">
+        RARTA = #{rarta,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="cityName != null">
+        CITY_NAME = #{cityName,jdbcType=VARCHAR},
+      </if>
+      <if test="band != null">
+        BAND = #{band,jdbcType=VARCHAR},
+      </if>
+      <if test="operator != null">
+        OPERATOR = #{operator,jdbcType=VARCHAR},
+      </if>
+      <if test="phoneSection != null">
+        PHONE_SECTION = #{phoneSection,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.TargetAlarm">
+    update t_target_alarm
+    set SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      IMSI = #{imsi,jdbcType=VARCHAR},
+      IMEI = #{imei,jdbcType=VARCHAR},
+      STMSI = #{stmsi,jdbcType=VARCHAR},
+      MAC = #{mac,jdbcType=VARCHAR},
+      LATYPE = #{latype,jdbcType=VARCHAR},
+      INDICATION = #{indication,jdbcType=TINYINT},
+      REALTIME = #{realtime,jdbcType=BIT},
+      CAPTURE_TIME = #{captureTime,jdbcType=VARCHAR},
+      RARTA = #{rarta,jdbcType=BIGINT},
+      CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      CITY_NAME = #{cityName,jdbcType=VARCHAR},
+      BAND = #{band,jdbcType=VARCHAR},
+      OPERATOR = #{operator,jdbcType=VARCHAR},
+      PHONE_SECTION = #{phoneSection,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  
+   <update id="setIsRead" parameterType="java.lang.Long">
+    update t_target_alarm
+    set IS_READ = 1
+    where ID = #{targetId,jdbcType=BIGINT}
+  	</update>
+  
+  <resultMap   type="com.iekun.ef.model.TargetAlarm"  id="TargetAlarmResultMap">
+    <id column="ID" jdbcType="BIGINT" property="id" /> 
+    <result column="RULE_NAME" jdbcType="VARCHAR" property="ruleName" />   
+    <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+    <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+    <result column="IMSI" jdbcType="VARCHAR" property="imsi" />
+    <result column="IMEI" jdbcType="VARCHAR" property="imei" />
+    <result column="STMSI" jdbcType="VARCHAR" property="stmsi" />
+    <result column="MAC" jdbcType="VARCHAR" property="mac" />
+    <result column="LATYPE" jdbcType="VARCHAR" property="latype" />
+    <result column="INDICATION" jdbcType="TINYINT" property="indication" />
+    <result column="REALTIME" jdbcType="BIT" property="realtime" />
+    <result column="CAPTURE_TIME" jdbcType="VARCHAR" property="captureTime" />
+    <result column="RARTA" jdbcType="BIGINT" property="rarta" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="CITY_NAME" jdbcType="VARCHAR" property="cityName" />
+    <result column="CITY_CODE" jdbcType="VARCHAR" property="cityCode" />
+    <result column="BAND" jdbcType="VARCHAR" property="band" />
+    <result column="OPERATOR" jdbcType="VARCHAR" property="operator" />
+    <result column="IS_READ" jdbcType="BIT" property="isRead" /> 
+    <result column="RULE_NAME" jdbcType="VARCHAR" property="ruleName" />
+    <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    <!-- device为targetAlarm pojo中定义的变量 -->
+	<association property="device"  javaType="com.iekun.ef.model.Device">    
+        <id property="id" column="DEVICE_ID" />  
+	    <result column="DEVICE_NAME" jdbcType="VARCHAR" property="name" />
+	</association>        
+   </resultMap>  
+   
+  <select id="getCurrentTargetList" parameterType="java.util.Map" resultMap="TargetAlarmResultMap">
+      select 
+      	TTA.ID,
+      	TTR.NAME as RULE_NAME,
+		TTR.REMARK,
+    	TTA.SITE_NAME,
+    	TTA.DEVICE_SN,
+    	TTA.IMSI,
+    	TTA.IMEI,
+    	TTA.STMSI,
+    	TTA.MAC,
+    	TTA.LATYPE,
+    	TTA.INDICATION,
+    	TTA.REALTIME,
+    	TTA.CAPTURE_TIME,
+    	TTA.RARTA,
+    	TTA.CREATE_TIME,
+    	TTA.CITY_NAME,
+    	TTA.CITY_CODE,
+    	TTA.BAND,
+    	TTA.OPERATOR,
+    	TTA.IS_READ,
+    	TD.NAME as  DEVICE_NAME
+    from t_target_alarm TTA
+       	left join t_device TD on TD.SN = TTA.DEVICE_SN
+        left join t_target_rule TTR on TTR.IMSI = TTA.IMSI
+    where TTA.IS_READ = 0 and (TTA.INDICATION = 1 OR TTA.INDICATION = 3) and TD.DELETE_FLAG = 0 and TTR.DELETE_FLAG = 0
+    <if test="creatorId != null"> 
+     AND TTR.CREATOR_ID = #{creatorId}  
+    </if> 
+    <if test="targetImsi!=null">
+       and TTA.IMSI in
+      <foreach  item="item" collection="targetImsi"
+               index="index" open="(" close=")" separator=",">
+        #{item,jdbcType=VARCHAR}
+      </foreach>
+    </if>
+    <if test="sites!=null">
+       and SITE_SN in
+      <foreach  item="item" collection="sites"
+               index="index" open="(" close=")" separator=",">
+        #{item.sn,jdbcType=VARCHAR}
+      </foreach>
+    </if>
+    UNION
+		select 
+      TTA.ID,
+      TAR.NAME as RULE_NAME,
+			TAR.REMARK,
+    	TTA.SITE_NAME,
+    	TTA.DEVICE_SN,
+    	TTA.IMSI,
+    	TTA.IMEI,
+    	TTA.STMSI,
+    	TTA.MAC,
+    	TTA.LATYPE,
+    	TTA.INDICATION,
+    	TTA.REALTIME,
+    	TTA.CAPTURE_TIME,
+    	TTA.RARTA,
+    	TTA.CREATE_TIME,
+    	TTA.CITY_NAME,
+    	TTA.CITY_CODE,
+    	TTA.BAND,
+    	TTA.OPERATOR,
+    	TTA.IS_READ,
+    	TD.NAME as  DEVICE_NAME
+    from t_target_alarm TTA
+       	left join t_device TD on TD.SN = TTA.DEVICE_SN
+        left join t_area_rule TAR on TAR.SOURCE_CITY_CODE = TTA.CITY_CODE
+    where TTA.IS_READ = 0 and (TTA.INDICATION = 2 OR TTA.INDICATION = 3) and TD.DELETE_FLAG = 0 and TAR.DELETE_FLAG = 0
+    <if test="creatorId != null">  
+     AND TAR.CREATOR_ID = #{creatorId}  
+    </if> 
+    <if test="targetAreaCode!=null">
+       AND TTA.CITY_CODE in
+      <foreach  item="item" collection="targetAreaCode"
+               index="index" open="(" close=")" separator=",">
+        #{item,jdbcType=VARCHAR}
+      </foreach>
+      <if test="sites!=null">
+       and SITE_SN in
+      <foreach  item="item" collection="sites"
+               index="index" open="(" close=")" separator=",">
+        #{item.sn,jdbcType=VARCHAR}
+      </foreach>
+    </if>
+    </if>
+  </select>
+  
+  <select id="selectAlarmInfoList" parameterType="java.util.Map" resultMap="TargetAlarmResultMap">
+     select * from  (select 
+      	TTA.ID,
+      	TTR.NAME as RULE_NAME,
+		TTR.REMARK,
+    	TTA.SITE_NAME,
+    	TTA.DEVICE_SN,
+    	TTA.IMSI,
+    	TTA.IMEI,
+    	TTA.STMSI,
+    	TTA.MAC,
+    	TTA.LATYPE,
+    	TTA.INDICATION,
+    	TTA.REALTIME,
+    	TTA.CAPTURE_TIME,
+    	TTA.RARTA,
+    	TTA.CREATE_TIME,
+    	TTA.CITY_NAME,
+    	TTA.CITY_CODE,
+    	TTA.BAND,
+    	TTA.OPERATOR,
+    	TTA.IS_READ,
+    	TTA.SITE_SN AS SITE_SN,
+    	TD.NAME as  DEVICE_NAME
+    from t_target_alarm TTA
+       	left join t_device TD on TD.SN = TTA.DEVICE_SN
+        left join t_target_rule TTR on TTR.IMSI = TTA.IMSI
+    where (TTA.INDICATION = 1 OR TTA.INDICATION = 3)  and TTR.DELETE_FLAG = 0
+    <if test="creatorId != null">  
+     AND TTR.CREATOR_ID = #{creatorId}  
+    </if> 
+     <if test="targetImsi!=null">
+       and TTA.IMSI in
+      <foreach  item="item" collection="targetImsi"
+               index="index" open="(" close=")" separator=",">
+        #{item,jdbcType=VARCHAR}
+      </foreach>
+    </if>
+    <if test="ruleName != null">  
+     AND TTR.NAME = #{ruleName}  
+    </if> 
+     <if test="homeOwnership != null">  
+     AND TTA.CITY_CODE = #{homeOwnership}  
+    </if> 
+    <if test="deviceSn != null">  
+     AND TTA.DEVICE_SN = #{deviceSn}  
+    </if> 
+    <if test="siteSn != null">  
+     AND TTA.SITE_SN = #{siteSn}  
+    </if>  
+     <if test="imsi != null">  
+     AND TTA.IMSI = #{imsi}  
+    </if>  
+    <if test="startDate != null">  
+      AND TTA.CAPTURE_TIME <![CDATA[ >= ]]> #{startDate} AND  #{endDate} <![CDATA[ >= ]]> TTA.CAPTURE_TIME
+    </if>  
+     <if test="startDate == null">  
+      AND TTA.CAPTURE_TIME between "2116-12-12 23:23:23" and "2116-12-12 23:23:23"  
+    </if>  
+    UNION
+		select 
+      TTA.ID,
+      TAR.NAME as RULE_NAME,
+			TAR.REMARK,
+    	TTA.SITE_NAME,
+    	TTA.DEVICE_SN,
+    	TTA.IMSI,
+    	TTA.IMEI,
+    	TTA.STMSI,
+    	TTA.MAC,
+    	TTA.LATYPE,
+    	TTA.INDICATION,
+    	TTA.REALTIME,
+    	TTA.CAPTURE_TIME,
+    	TTA.RARTA,
+    	TTA.CREATE_TIME,
+    	TTA.CITY_NAME,
+    	TTA.CITY_CODE,
+    	TTA.BAND,
+    	TTA.OPERATOR,
+    	TTA.IS_READ,
+    	TTA.SITE_SN AS SITE_SN,
+    	TD.NAME as  DEVICE_NAME
+    from t_target_alarm TTA
+       	left join t_device TD on TD.SN = TTA.DEVICE_SN
+        left join t_area_rule TAR on TAR.SOURCE_CITY_CODE = TTA.CITY_CODE
+    where (TTA.INDICATION = 2 OR TTA.INDICATION = 3)  and TAR.DELETE_FLAG = 0
+    <if test="creatorId != null">  
+     AND TAR.CREATOR_ID = #{creatorId}  
+    </if> 
+    <if test="targetAreaCode!=null">
+       AND TTA.CITY_CODE in
+      <foreach  item="item" collection="targetAreaCode"
+               index="index" open="(" close=")" separator=",">
+        #{item,jdbcType=VARCHAR}
+      </foreach>
+    </if>
+     <if test="ruleName != null">  
+     AND TAR.NAME = #{ruleName}  
+    </if> 
+     <if test="homeOwnership != null">  
+     AND TTA.CITY_CODE = #{homeOwnership}  
+    </if> 
+    <if test="deviceSn != null">  
+     AND TTA.DEVICE_SN = #{deviceSn}  
+    </if> 
+    <if test="siteSn != null">  
+     AND TTA.SITE_SN = #{siteSn}  
+    </if>  
+     <if test="imsi != null">  
+     AND TTA.IMSI = #{imsi}  
+    </if>  
+    <if test="startDate != null">  
+      AND TTA.CAPTURE_TIME <![CDATA[ >= ]]> #{startDate} AND  #{endDate} <![CDATA[ >= ]]> TTA.CAPTURE_TIME
+    </if>  
+     <if test="startDate == null">  
+      AND TTA.CAPTURE_TIME between "2116-12-12 23:23:23" and "2116-12-12 23:23:23"  
+    </if>  
+    ) as allTable where 1=1
+      <if test="sites!=null">
+       AND allTable.SITE_SN in
+      <foreach  item="item" collection="sites"
+               index="index" open="(" close=")" separator=",">
+        #{item.sn,jdbcType=VARCHAR}
+      </foreach>
+    </if>
+      <if test="start != null and length != null">
+      order by allTable.CAPTURE_TIME DESC 
+      limit #{start}, #{length}
+      </if>
+  </select>
+  
+  <select id="getTotalAlarmCount" parameterType="java.util.Map" resultType="java.lang.Long">
+    select count(1) from 
+    (select 
+    *
+    from (select 
+      	TTA.ID,
+      	TTR.NAME as RULE_NAME,
+		TTR.REMARK,
+    	TTA.SITE_NAME,
+    	TTA.DEVICE_SN,
+    	TTA.IMSI,
+    	TTA.IMEI,
+    	TTA.STMSI,
+    	TTA.MAC,
+    	TTA.LATYPE,
+    	TTA.INDICATION,
+    	TTA.REALTIME,
+    	TTA.CAPTURE_TIME,
+    	TTA.RARTA,
+    	TTA.CREATE_TIME,
+    	TTA.CITY_NAME,
+    	TTA.CITY_CODE,
+    	TTA.BAND,
+    	TTA.OPERATOR,
+    	TTA.IS_READ,
+    	TTA.SITE_SN AS SITE_SN,
+    	TD.NAME as  DEVICE_NAME
+    from t_target_alarm TTA
+       	left join t_device TD on TD.SN = TTA.DEVICE_SN
+        left join t_target_rule TTR on TTR.IMSI = TTA.IMSI
+    where (TTA.INDICATION = 1 OR TTA.INDICATION = 3) and TTR.DELETE_FLAG = 0
+    <if test="creatorId != null">  
+     AND TTR.CREATOR_ID = #{creatorId}  
+    </if> 
+     <if test="targetImsi!=null">
+       and TTA.IMSI in
+      <foreach  item="item" collection="targetImsi"
+               index="index" open="(" close=")" separator=",">
+        #{item,jdbcType=VARCHAR}
+      </foreach>
+    </if>
+    <if test="ruleName != null">  
+     AND TTR.NAME = #{ruleName}  
+    </if> 
+     <if test="homeOwnership != null">  
+     AND TTA.CITY_CODE = #{homeOwnership}  
+    </if> 
+    <if test="deviceSn != null">  
+     AND TTA.DEVICE_SN = #{deviceSn}  
+    </if> 
+    <if test="siteSn != null">  
+     AND TTA.SITE_SN = #{siteSn}  
+    </if>  
+     <if test="imsi != null">  
+     AND TTA.IMSI = #{imsi}  
+    </if>  
+    <if test="startDate != null">  
+      AND TTA.CAPTURE_TIME <![CDATA[ >= ]]> #{startDate} AND  #{endDate} <![CDATA[ >= ]]> TTA.CAPTURE_TIME
+    </if>  
+     <if test="startDate == null">  
+      AND TTA.CAPTURE_TIME between "2116-12-12 23:23:23" and "2116-12-12 23:23:23"  
+    </if>  
+    UNION
+		select 
+      TTA.ID,
+      TAR.NAME as RULE_NAME,
+			TAR.REMARK,
+    	TTA.SITE_NAME,
+    	TTA.DEVICE_SN,
+    	TTA.IMSI,
+    	TTA.IMEI,
+    	TTA.STMSI,
+    	TTA.MAC,
+    	TTA.LATYPE,
+    	TTA.INDICATION,
+    	TTA.REALTIME,
+    	TTA.CAPTURE_TIME,
+    	TTA.RARTA,
+    	TTA.CREATE_TIME,
+    	TTA.CITY_NAME,
+    	TTA.CITY_CODE,
+    	TTA.BAND,
+    	TTA.OPERATOR,
+    	TTA.IS_READ,
+    	TTA.SITE_SN AS SITE_SN,
+    	TD.NAME as  DEVICE_NAME
+    from t_target_alarm TTA
+       	left join t_device TD on TD.SN = TTA.DEVICE_SN
+        left join t_area_rule TAR on TAR.SOURCE_CITY_CODE = TTA.CITY_CODE
+    where (TTA.INDICATION = 2 OR TTA.INDICATION = 3) and TAR.DELETE_FLAG = 0
+    <if test="creatorId != null">  
+     AND TAR.CREATOR_ID = #{creatorId}  
+    </if> 
+    <if test="targetAreaCode!=null">
+       AND TTA.CITY_CODE in
+      <foreach  item="item" collection="targetAreaCode"
+               index="index" open="(" close=")" separator=",">
+        #{item,jdbcType=VARCHAR}
+      </foreach>
+    </if>
+     <if test="ruleName != null">  
+     AND TAR.NAME = #{ruleName}  
+    </if> 
+     <if test="homeOwnership != null">  
+     AND TTA.CITY_CODE = #{homeOwnership}  
+    </if> 
+    <if test="deviceSn != null">  
+     AND TTA.DEVICE_SN = #{deviceSn}  
+    </if> 
+    <if test="siteSn != null">  
+     AND TTA.SITE_SN = #{siteSn}  
+    </if>  
+     <if test="imsi != null">  
+     AND TTA.IMSI = #{imsi}  
+    </if>  
+    <if test="startDate != null">  
+       AND TTA.CAPTURE_TIME <![CDATA[ >= ]]> #{startDate} AND  #{endDate} <![CDATA[ >= ]]> TTA.CAPTURE_TIME
+    </if>  
+     <if test="startDate == null">  
+      AND TTA.CAPTURE_TIME between "2116-12-12 23:23:23" and "2116-12-12 23:23:23"  
+    </if>  
+    ) as allTable  where 1=1
+    <if test="sites!=null">
+       AND allTable.SITE_SN in
+      <foreach  item="item" collection="sites"
+               index="index" open="(" close=")" separator=",">
+        #{item.sn,jdbcType=VARCHAR}
+      </foreach>
+    </if>
+     ) as resultTab
+  </select>
+
+  <select id="getTargetAlarmTotal" parameterType="java.lang.Integer" resultType="java.lang.Long">
+    select count(1) 
+     from t_target_alarm
+     where INDICATION = #{indication, jdbcType=TINYINT}
+  </select>
+
+
+
+  <!-- <resultMap   type="com.iekun.ef.model.TargetAlarm"  id="TargetAlarmResultMap">
+    <id column="ID" jdbcType="BIGINT" property="id" />    
+    <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+    <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+    <result column="IMSI" jdbcType="VARCHAR" property="imsi" />
+    <result column="IMEI" jdbcType="VARCHAR" property="imei" />
+    <result column="STMSI" jdbcType="VARCHAR" property="stmsi" />
+    <result column="MAC" jdbcType="VARCHAR" property="mac" />
+    <result column="LATYPE" jdbcType="VARCHAR" property="latype" />
+    <result column="INDICATION" jdbcType="TINYINT" property="indication" />
+    <result column="REALTIME" jdbcType="BIT" property="realtime" />
+    <result column="CAPTURE_TIME" jdbcType="VARCHAR" property="captureTime" />
+    <result column="RARTA" jdbcType="BIGINT" property="rarta" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="CITY_NAME" jdbcType="VARCHAR" property="cityName" />
+    <result column="BAND" jdbcType="VARCHAR" property="band" />
+    <result column="OPERATOR" jdbcType="VARCHAR" property="operator" />
+    <result column="NUMBER_SECTION" jdbcType="VARCHAR" property="numberSection" />
+    <result column="IS_READ" jdbcType="BIT" property="isRead" /> 
+    
+    targetRule为targetAlarm pojo中定义的变量
+    <association property="targetRule"  javaType="com.iekun.ef.model.TargetRule">    
+        <id property="id" column="TARGETRULE_ID" />  
+	    <result column="TARGETRULE_NAME" jdbcType="VARCHAR" property="name" />
+	    <result column="TARGERULE_REMARK" jdbcType="VARCHAR" property="remark" />
+	</association> 
+	areaRule为targetAlarm pojo中定义的变量
+	<association property="areaRule"  javaType="com.iekun.ef.model.AreaRule">    
+        <id property="id" column="AREARULE_ID" />  
+	    <result column="AREARULE_NAME" jdbcType="VARCHAR" property="name" />
+	    <result column="AREARULE_REMARK" jdbcType="VARCHAR" property="remark" />
+	</association>
+	device为targetAlarm pojo中定义的变量
+	<association property="device"  javaType="com.iekun.ef.model.Device">    
+        <id property="id" column="DEVICE_ID" />  
+	    <result column="DEVICE_NAME" jdbcType="VARCHAR" property="name" />
+	</association>        
+   </resultMap>  
+   
+  <select id="GetCurrentTargetList"  resultMap="TargetAlarmResultMap">
+    select 
+    	TTA.SITE_NAME,
+    	TTA.DEVICE_SN,
+    	TTA.IMSI,
+    	TTA.IMEI,
+    	TTA.STMSI,
+    	TTA.MAC,
+    	TTA.LATYPE,
+    	TTA.INDICATION,
+    	TTA.REALTIME,
+    	TTA.CAPTURE_TIME,
+    	TTA.RARTA,
+    	TTA.CREATE_TIME,
+    	TTA.BAND,
+    	TTA.OPERATOR,
+	   	TTA.IS_READ,
+    	TTR.ID as TARGETRULE_ID,
+    	TTR.NAME as TARGETRULE_NAME,
+    	TTR.REMARK as TARGERULE_REMARK,
+    	TAR.ID as AREARULE_ID,
+    	TAR.NAME as AREARULE_NAME,
+    	TAR.REMARK as AREARULE_REMARK,
+    	TD.NAME as  DEVICE_NAME
+    from t_target_alarm TTA
+    	<if test="TTA.INDICATION == 1">
+    	left join t_target_rule TTR on TTR.IMSI = TTA.IMSI
+    	</if>
+    	<if test="TTA.INDICATION == 2">
+    	left join t_area_rule   TAR on TAR.SOURCE_CITY_NAME = TTA.CITY_NAME
+    	</if>
+    	left join t_device TD on TD.SN = TTA.DEVICE_SN
+    where TTA.IS_READ = 0
+  </select> -->
+  
+  <!-- <resultMap id="BaseResultMap" type="com.iekun.ef.model.TargetAlarm">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+    <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+    <result column="IMSI" jdbcType="VARCHAR" property="imsi" />
+    <result column="IMEI" jdbcType="VARCHAR" property="imei" />
+    <result column="STMSI" jdbcType="VARCHAR" property="stmsi" />
+    <result column="MAC" jdbcType="VARCHAR" property="mac" />
+    <result column="LATYPE" jdbcType="VARCHAR" property="latype" />
+    <result column="INDICATION" jdbcType="TINYINT" property="indication" />
+    <result column="REALTIME" jdbcType="BIT" property="realtime" />
+    <result column="CAPTURE_TIME" jdbcType="VARCHAR" property="captureTime" />
+    <result column="RARTA" jdbcType="BIGINT" property="rarta" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="CITY_NAME" jdbcType="VARCHAR" property="cityName" />
+    <result column="BAND" jdbcType="VARCHAR" property="band" />
+    <result column="PHONE_SECTION" jdbcType="VARCHAR" property="phoneSection" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, SITE_NAME, DEVICE_SN, IMSI, IMEI, STMSI, MAC, LATYPE, INDICATION, REALTIME, CAPTURE_TIME, 
+    RARTA, CREATE_TIME, CITY_NAME, BAND, PHONE_SECTION
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.TargetAlarmExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_target_alarm
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_target_alarm
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_target_alarm
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.TargetAlarmExample">
+    delete from t_target_alarm
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.TargetAlarm">
+    insert into t_target_alarm (ID, SITE_NAME, DEVICE_SN, 
+      IMSI, IMEI, STMSI, 
+      MAC, LATYPE, INDICATION, 
+      REALTIME, CAPTURE_TIME, RARTA, 
+      CREATE_TIME, CITY_NAME, BAND, 
+      PHONE_SECTION)
+    values (#{id,jdbcType=BIGINT}, #{siteName,jdbcType=VARCHAR}, #{deviceSn,jdbcType=VARCHAR}, 
+      #{imsi,jdbcType=VARCHAR}, #{imei,jdbcType=VARCHAR}, #{stmsi,jdbcType=VARCHAR}, 
+      #{mac,jdbcType=VARCHAR}, #{latype,jdbcType=VARCHAR}, #{indication,jdbcType=TINYINT}, 
+      #{realtime,jdbcType=BIT}, #{captureTime,jdbcType=VARCHAR}, #{rarta,jdbcType=BIGINT}, 
+      #{createTime,jdbcType=VARCHAR}, #{cityName,jdbcType=VARCHAR}, #{band,jdbcType=VARCHAR}, 
+      #{phoneSection,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.TargetAlarm">
+    insert into t_target_alarm
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="siteName != null">
+        SITE_NAME,
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN,
+      </if>
+      <if test="imsi != null">
+        IMSI,
+      </if>
+      <if test="imei != null">
+        IMEI,
+      </if>
+      <if test="stmsi != null">
+        STMSI,
+      </if>
+      <if test="mac != null">
+        MAC,
+      </if>
+      <if test="latype != null">
+        LATYPE,
+      </if>
+      <if test="indication != null">
+        INDICATION,
+      </if>
+      <if test="realtime != null">
+        REALTIME,
+      </if>
+      <if test="captureTime != null">
+        CAPTURE_TIME,
+      </if>
+      <if test="rarta != null">
+        RARTA,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="cityName != null">
+        CITY_NAME,
+      </if>
+      <if test="band != null">
+        BAND,
+      </if>
+      <if test="phoneSection != null">
+        PHONE_SECTION,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="siteName != null">
+        #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="imsi != null">
+        #{imsi,jdbcType=VARCHAR},
+      </if>
+      <if test="imei != null">
+        #{imei,jdbcType=VARCHAR},
+      </if>
+      <if test="stmsi != null">
+        #{stmsi,jdbcType=VARCHAR},
+      </if>
+      <if test="mac != null">
+        #{mac,jdbcType=VARCHAR},
+      </if>
+      <if test="latype != null">
+        #{latype,jdbcType=VARCHAR},
+      </if>
+      <if test="indication != null">
+        #{indication,jdbcType=TINYINT},
+      </if>
+      <if test="realtime != null">
+        #{realtime,jdbcType=BIT},
+      </if>
+      <if test="captureTime != null">
+        #{captureTime,jdbcType=VARCHAR},
+      </if>
+      <if test="rarta != null">
+        #{rarta,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="cityName != null">
+        #{cityName,jdbcType=VARCHAR},
+      </if>
+      <if test="band != null">
+        #{band,jdbcType=VARCHAR},
+      </if>
+      <if test="phoneSection != null">
+        #{phoneSection,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.TargetAlarmExample" resultType="java.lang.Integer">
+    select count(*) from t_target_alarm
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_target_alarm
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.siteName != null">
+        SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deviceSn != null">
+        DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="record.imsi != null">
+        IMSI = #{record.imsi,jdbcType=VARCHAR},
+      </if>
+      <if test="record.imei != null">
+        IMEI = #{record.imei,jdbcType=VARCHAR},
+      </if>
+      <if test="record.stmsi != null">
+        STMSI = #{record.stmsi,jdbcType=VARCHAR},
+      </if>
+      <if test="record.mac != null">
+        MAC = #{record.mac,jdbcType=VARCHAR},
+      </if>
+      <if test="record.latype != null">
+        LATYPE = #{record.latype,jdbcType=VARCHAR},
+      </if>
+      <if test="record.indication != null">
+        INDICATION = #{record.indication,jdbcType=TINYINT},
+      </if>
+      <if test="record.realtime != null">
+        REALTIME = #{record.realtime,jdbcType=BIT},
+      </if>
+      <if test="record.captureTime != null">
+        CAPTURE_TIME = #{record.captureTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.rarta != null">
+        RARTA = #{record.rarta,jdbcType=BIGINT},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.cityName != null">
+        CITY_NAME = #{record.cityName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.band != null">
+        BAND = #{record.band,jdbcType=VARCHAR},
+      </if>
+      <if test="record.phoneSection != null">
+        PHONE_SECTION = #{record.phoneSection,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_target_alarm
+    set ID = #{record.id,jdbcType=BIGINT},
+      SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      IMSI = #{record.imsi,jdbcType=VARCHAR},
+      IMEI = #{record.imei,jdbcType=VARCHAR},
+      STMSI = #{record.stmsi,jdbcType=VARCHAR},
+      MAC = #{record.mac,jdbcType=VARCHAR},
+      LATYPE = #{record.latype,jdbcType=VARCHAR},
+      INDICATION = #{record.indication,jdbcType=TINYINT},
+      REALTIME = #{record.realtime,jdbcType=BIT},
+      CAPTURE_TIME = #{record.captureTime,jdbcType=VARCHAR},
+      RARTA = #{record.rarta,jdbcType=BIGINT},
+      CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      CITY_NAME = #{record.cityName,jdbcType=VARCHAR},
+      BAND = #{record.band,jdbcType=VARCHAR},
+      PHONE_SECTION = #{record.phoneSection,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.TargetAlarm">
+    update t_target_alarm
+    <set>
+      <if test="siteName != null">
+        SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="imsi != null">
+        IMSI = #{imsi,jdbcType=VARCHAR},
+      </if>
+      <if test="imei != null">
+        IMEI = #{imei,jdbcType=VARCHAR},
+      </if>
+      <if test="stmsi != null">
+        STMSI = #{stmsi,jdbcType=VARCHAR},
+      </if>
+      <if test="mac != null">
+        MAC = #{mac,jdbcType=VARCHAR},
+      </if>
+      <if test="latype != null">
+        LATYPE = #{latype,jdbcType=VARCHAR},
+      </if>
+      <if test="indication != null">
+        INDICATION = #{indication,jdbcType=TINYINT},
+      </if>
+      <if test="realtime != null">
+        REALTIME = #{realtime,jdbcType=BIT},
+      </if>
+      <if test="captureTime != null">
+        CAPTURE_TIME = #{captureTime,jdbcType=VARCHAR},
+      </if>
+      <if test="rarta != null">
+        RARTA = #{rarta,jdbcType=BIGINT},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="cityName != null">
+        CITY_NAME = #{cityName,jdbcType=VARCHAR},
+      </if>
+      <if test="band != null">
+        BAND = #{band,jdbcType=VARCHAR},
+      </if>
+      <if test="phoneSection != null">
+        PHONE_SECTION = #{phoneSection,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.TargetAlarm">
+    update t_target_alarm
+    set SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      IMSI = #{imsi,jdbcType=VARCHAR},
+      IMEI = #{imei,jdbcType=VARCHAR},
+      STMSI = #{stmsi,jdbcType=VARCHAR},
+      MAC = #{mac,jdbcType=VARCHAR},
+      LATYPE = #{latype,jdbcType=VARCHAR},
+      INDICATION = #{indication,jdbcType=TINYINT},
+      REALTIME = #{realtime,jdbcType=BIT},
+      CAPTURE_TIME = #{captureTime,jdbcType=VARCHAR},
+      RARTA = #{rarta,jdbcType=BIGINT},
+      CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      CITY_NAME = #{cityName,jdbcType=VARCHAR},
+      BAND = #{band,jdbcType=VARCHAR},
+      PHONE_SECTION = #{phoneSection,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=BIGINT}
+  </update> -->
+</mapper>

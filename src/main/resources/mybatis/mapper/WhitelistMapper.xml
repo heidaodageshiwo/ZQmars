@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.WhitelistMapper">
+    <resultMap id="BaseResultMap" type="com.iekun.ef.model.Whitelist">
+        <id column="ID"  property="id" />
+        <result column="IMSI"  property="imsi" />
+        <result column="PHONE"  property="phone" />
+        <result column="NAME"  property="name" />
+        <result column="OPERATOR"  property="operator" />
+        <result column="OWNERSHIP"  property="ownership" />
+        <result column="ORGANIZATION"  property="organization" />
+        <result column="CREATORID"  property="creatorId" />
+    </resultMap>
+
+    <!--查询所有白名单-->
+    <select id="queryAll" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+            ID,IMSI,PHONE,NAME,OPERATOR,OWNERSHIP,ORGANIZATION,CREATORID
+        from
+            t_whitelist
+        where
+            CREATORID = #{userId}
+    </select>
+
+    <!--判断要添加的IMSI号是否已经存在-->
+    <select id="queryWhitelistByImsi" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+            ID,IMSI,PHONE,NAME,OPERATOR,OWNERSHIP,ORGANIZATION,CREATORID
+        from
+            t_whitelist
+        where
+            IMSI = #{imsi}
+    </select>
+
+    <!--添加白名单-->
+    <insert id="addWhitelist" parameterType="com.iekun.ef.model.Whitelist">
+        insert into t_whitelist
+            (ID,IMSI,PHONE,NAME,OPERATOR,OWNERSHIP,ORGANIZATION,CREATORID)
+        values
+            (#{id},#{imsi},#{phone},#{name},#{operator},#{ownership},#{organization},#{creatorId})
+    </insert>
+
+    <!--修改白名单-->
+    <update id="updateWhitelist" parameterType="com.iekun.ef.model.Whitelist">
+        update t_whitelist set
+            IMSI = #{imsi},
+            PHONE = #{phone},
+            NAME = #{name},
+            OPERATOR = #{operator},
+            OWNERSHIP = #{ownership},
+            ORGANIZATION = #{organization}
+        where
+            ID = #{id}
+    </update>
+
+    <!--删除白名单-->
+    <delete id="delWhitelist" parameterType="java.util.HashMap" >
+        delete from t_whitelist where ID in
+        <foreach collection="whitelistIds" item="whitelistId" open="(" close=")" separator=",">
+            #{whitelistId}
+        </foreach>
+    </delete>
+
+    <!--导入Excel-->
+    <insert id="insertExcel" parameterType="java.util.List">
+        insert into t_whitelist
+            (ID,IMSI,PHONE,NAME,OPERATOR,OWNERSHIP,ORGANIZATION,CREATORID)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.id},#{item.imsi},#{item.phone},#{item.name},#{item.operator},#{item.ownership},#{item.organization},#{item.creatorId})
+        </foreach>
+    </insert>
+
+    <!--查询所有IMSI号码-->
+    <select id="queryAllImsiByUserId" parameterType="java.lang.Long" resultType="java.lang.String">
+        select
+            IMSI
+        from
+            t_whitelist
+        where
+            CREATORID = #{userId}
+    </select>
+
+</mapper>

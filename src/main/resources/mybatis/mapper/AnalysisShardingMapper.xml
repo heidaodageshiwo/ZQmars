@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.AnalysisShardingMapper">
+    <resultMap type="com.iekun.ef.model.UeInfo" id="BaseResultMap" >
+        <id column="ID" jdbcType="BIGINT" property="id" />
+        <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+        <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+        <result column="IMSI" jdbcType="VARCHAR" property="imsi" />
+        <result column="IMEI" jdbcType="VARCHAR" property="imei" />
+        <result column="STMSI" jdbcType="VARCHAR" property="stmsi" />
+        <result column="MAC" jdbcType="VARCHAR" property="mac" />
+        <result column="LATYPE" jdbcType="VARCHAR" property="latype" />
+        <result column="INDICATION" jdbcType="TINYINT" property="indication" />
+        <result column="REALTIME" jdbcType="BIT" property="realtime" />
+        <result column="CAPTURE_TIME" jdbcType="VARCHAR" property="captureTime" />
+        <result column="RARTA" jdbcType="BIGINT" property="rarta" />
+        <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+        <result column="CITY_NAME" jdbcType="VARCHAR" property="cityName" />
+        <result column="BAND" jdbcType="VARCHAR" property="band" />
+        <result column="OPERATOR" jdbcType="VARCHAR" property="operator" />
+        <result column="SITE_SN" jdbcType="VARCHAR" property="siteSn" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        ID, SITE_NAME, DEVICE_SN, IMSI, IMEI, STMSI, MAC, LATYPE, INDICATION, REALTIME, CAPTURE_TIME,
+        RARTA, CREATE_TIME, CITY_NAME, BAND, OPERATOR, SITE_SN
+    </sql>
+
+    <select id="getUeInfoShardingCountByDay" parameterType="java.util.Map" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM  `${tableName}`  t
+        WHERE
+        DATE_FORMAT(t.CAPTURE_TIME,'%Y-%m-%d') = #{statisticsTime}
+        <if test="deviceSN != null">
+            AND t.DEVICE_SN = #{deviceSN}
+        </if>
+        <if test="siteSN != null">
+            AND t.SITE_SN = #{siteSN}
+        </if>
+        <if test="operator != null">
+            AND t.OPERATOR = #{operator}
+        </if>
+        <if test="sites!=null and sites.size >0 ">
+            AND  t.SITE_SN in
+            <foreach  item="item" collection="sites"
+                      index="index" open="(" close=")" separator=",">
+                #{item.sn,jdbcType=VARCHAR}
+            </foreach>
+        </if>
+    </select>
+    
+    <select id="getUeInfoTotalCntOfShardingTab" parameterType="java.util.Map" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM  `${tableName}`  t
+        WHERE 1=1
+    </select>
+
+    <select id="getUeInfoShardingCountByHour" parameterType="java.util.Map" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM `${tableName}`  t
+        WHERE
+        DATE_FORMAT(t.CAPTURE_TIME,'%Y-%m-%d %H') = #{statisticsTime}
+        <if test="deviceSN != null">
+            AND t.DEVICE_SN = #{deviceSN}
+        </if>
+        <if test="siteSN != null">
+            AND t.SITE_SN = #{siteSN}
+        </if>
+        <if test="operator != null">
+            AND t.OPERATOR = #{operator}
+        </if>
+        <if test="sites!=null and sites.size >0 ">
+            AND  t.SITE_SN in
+            <foreach  item="item" collection="sites"
+                      index="index" open="(" close=")" separator=",">
+                #{item.sn,jdbcType=VARCHAR}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getUeInfoShardingCountByMin" parameterType="java.util.Map" resultType="java.lang.Long">
+        SELECT COUNT(1)
+        FROM `${tableName}`  t
+        WHERE
+        DATE_FORMAT(t.CAPTURE_TIME,'%Y-%m-%d %H:%i') = #{statisticsTime}
+        <if test="deviceSN != null">
+            AND t.DEVICE_SN = #{deviceSN}
+        </if>
+        <if test="siteSN != null">
+            AND t.SITE_SN = #{siteSN}
+        </if>
+        <if test="operator != null">
+            AND t.OPERATOR = #{operator}
+        </if>
+        <if test="sites!=null and sites.size >0">
+            AND  t.SITE_SN in
+            <foreach  item="item" collection="sites"
+                      index="index" open="(" close=")" separator=",">
+                #{item.sn,jdbcType=VARCHAR}
+            </foreach>
+        </if>
+    </select>
+
+    <select id="getUeInfoShardingBySuspect"  parameterType="java.util.Map"  resultType="java.util.HashMap" >
+        SELECT
+        S.SN as siteSN,
+        S.NAME AS siteName,
+        S.LONGITUDE AS longitude,
+        S.LATITUDE AS latitude,
+        T.CAPTURE_TIME AS time
+        FROM
+        `${tableName}` T
+        INNER JOIN  t_site  S
+        ON S.SN = T.SITE_SN
+        WHERE
+        T.IMSI = #{imsi,jdbcType=VARCHAR}
+        AND ( T.CAPTURE_TIME BETWEEN #{startTime,jdbcType=VARCHAR} AND #{endTime,jdbcType=VARCHAR} )
+        AND S.DELETE_FLAG =0
+        ORDER BY T.CAPTURE_TIME ASC
+    </select>
+
+    <update id="createTempTableSharding">
+        CREATE TABLE `${tableName}` ( IMSI varchar(16) ) DEFAULT CHARSET=utf8
+    </update>
+
+    <update id="deleteTempTableSharding">
+        DROP TABLE `${tableName}`
+    </update>
+
+    <update id="truncateTempTableSharding">
+        TRUNCATE TABLE `${tableName}`
+    </update>
+
+    <select id="existTempTableSharding"  resultType="Integer">
+        SELECT count(1)
+        FROM information_schema.`TABLES`
+        WHERE TABLE_NAME=#{tableName}
+    </select>
+
+    <insert id="insertResidentPeopleInterTableSharding" parameterType="java.util.Map" >
+        INSERT INTO `${tableName}` ( IMSI )
+        SELECT IMSI from (SELECT * FROM `${dayTableName}`
+        WHERE
+        DATE_FORMAT( CAPTURE_TIME,'%Y-%m-%d') = #{loopTime}
+        GROUP BY IMSI)as tempTable
+        <if test="sites!=null">
+            where  SITE_SN in
+            <foreach  item="item" collection="sites"
+                      index="index" open="(" close=")" separator=",">
+                #{item.sn,jdbcType=VARCHAR}
+            </foreach>
+        </if>
+        
+    </insert>
+
+    <select id="getTotalCountResidentPeopleSharding"  resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM (
+        SELECT
+        IMSI as imsi
+        FROM `${tableName}`
+        GROUP BY IMSI
+        ) TT
+    </select>
+
+    <select id="getFixedCountResidentPeopleSharding"  resultType="java.lang.Long">
+        <![CDATA[
+      SELECT COUNT(*)
+      FROM (
+      SELECT
+      IMSI as imsi,
+      ( COUNT(*)/#{totalDay} * 100 ) AS rate
+      FROM `${tableName}`
+      GROUP BY IMSI
+      ORDER BY rate DESC
+      ) TT
+      WHERE TT.rate > 70
+    ]]>
+    </select>
+
+    <select id="getPeriodCountResidentPeopleSharding"  resultType="java.lang.Long">
+        <![CDATA[
+      SELECT COUNT(*)
+      FROM (
+      SELECT
+      IMSI as imsi,
+      ( COUNT(*)/#{totalDay} * 100 ) AS rate
+      FROM `${tableName}`
+      GROUP BY IMSI
+      ORDER BY rate DESC
+      ) TT
+      WHERE TT.rate <= 70
+    ]]>
+    </select>
+
+    <select id="getResidentPeopleFixedRateListSharding" resultType="java.util.HashMap">
+        <![CDATA[
+        SELECT *
+        FROM (
+        SELECT
+        IMSI as imsi,
+        ( COUNT(*)/#{totalDay} * 100 ) AS rate
+        FROM `${tableName}`
+        GROUP BY IMSI
+        ORDER BY rate DESC
+        ) TT
+        WHERE TT.rate  > 70
+        LIMIT #{start}, #{length}
+    ]]>
+    </select>
+
+    <select id="getResidentPeoplePeriodRateListSharding" resultType="java.util.HashMap">
+        <![CDATA[
+      SELECT *
+      FROM (
+      SELECT
+      IMSI as imsi,
+      ( COUNT(*)/#{totalDay} * 100 ) AS rate
+      FROM `${tableName}`
+      GROUP BY IMSI
+      ORDER BY rate DESC
+      ) TT
+      WHERE TT.rate <= 70
+      LIMIT #{start}, #{length}
+    ]]>
+    </select>
+
+    <select id="selectUeInfoAggrByMinForIMSIFollowSharding" resultType="java.util.HashMap">
+        SELECT
+        SITE_SN AS siteSN,
+        DATE_FORMAT(CAPTURE_TIME, '%Y-%m-%d %H:%i' ) as captureTime
+        FROM  `${tableName}`
+        WHERE
+        IMSI = #{imsi,jdbcType=VARCHAR}
+        AND
+        ( CAPTURE_TIME BETWEEN #{startTime,jdbcType=VARCHAR} AND #{endTime,jdbcType=VARCHAR} )
+        GROUP BY captureTime
+    </select>
+
+    <insert id="insertIMSIFollowInterTableSharding" parameterType="java.util.Map" >
+        INSERT INTO `${tableName}` ( IMSI )
+        SELECT IMSI FROM `${srcTableName}`
+        WHERE
+        SITE_SN = #{siteSN}
+        AND
+        IMSI != #{imsi}
+        AND
+        ( CAPTURE_TIME BETWEEN #{startTime} AND #{endTime} )
+        GROUP BY IMSI
+    </insert>
+
+    <select id="getIMSIFollowRateListSharding" resultType="java.util.HashMap">
+        <![CDATA[
+      SELECT *
+      FROM (
+        SELECT
+            IMSI as imsi,
+            ( COUNT(*)/#{targetUeInfoTotal} * 100 ) AS rate
+        FROM `${tableName}`
+        GROUP BY IMSI
+        ORDER BY rate DESC
+      ) TT
+      WHERE TT.rate > 50
+    ]]>
+    </select>
+
+    <update id="createDateCollideTempTableSharding">
+         CREATE TABLE IF NOT EXISTS  `${tableName}`   (
+          `ID` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'Ue信息ID',
+          `SITE_NAME` varchar(40) DEFAULT NULL COMMENT '站点名称',
+          `DEVICE_SN` varchar(40) DEFAULT NULL COMMENT '子设备序列号',
+          `SITE_SN` varchar(40) DEFAULT NULL,
+          `IMSI` varchar(16) DEFAULT NULL COMMENT 'IMSI',
+          `IMEI` varchar(16) DEFAULT NULL COMMENT 'IMEI',
+          `STMSI` varchar(20) DEFAULT NULL COMMENT 'TMSI',
+          `MAC` varchar(20) DEFAULT NULL COMMENT 'MAC地址',
+          `LATYPE` varchar(4) DEFAULT NULL COMMENT '位置更新类型',
+          `INDICATION` tinyint(2) DEFAULT '0' COMMENT '是否目标手机：0 --- NORMAL；1--- 黑名单手机；2--- 特殊归属地手机',
+          `REALTIME` tinyint(1) DEFAULT '0' COMMENT '是否实时上报:00-  不实时上报;01-  实时上报',
+          `CAPTURE_TIME` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '基站侧记录的上号时间',
+          `RARTA` bigint(20) DEFAULT NULL,
+          `CREATE_TIME` varchar(14) DEFAULT NULL COMMENT '创建时间',
+          `CITY_NAME` varchar(100) DEFAULT NULL COMMENT '归属地地名',
+          `CITY_CODE` varchar(10) DEFAULT NULL,
+          `BAND` varchar(20) DEFAULT NULL COMMENT '运营商',
+          `OPERATOR` varchar(20) DEFAULT NULL COMMENT '运营商',
+          PRIMARY KEY (`ID`),
+          KEY `DEVICE_SN` (`SITE_NAME`),
+          KEY `SUBDEVICE_SN` (`DEVICE_SN`),
+          KEY `IMSI` (`IMSI`)
+        ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='碰撞分析临时表';
+    </update>
+
+    <insert id="insertDataCollideInterTableSharding"  >
+        INSERT INTO `${tableName}` ( IMSI )
+        SELECT IMSI FROM `${srcTableName}`
+        ${whereSql}
+    </insert>
+
+    <insert id="insertDataCollideSumTableSharding"  >
+        INSERT INTO `${tableName}` (SITE_NAME,DEVICE_SN,SITE_SN,IMSI,IMEI,STMSI, 
+        MAC,LATYPE,INDICATION, REALTIME,CAPTURE_TIME,RARTA,CREATE_TIME, CITY_NAME) 
+        SELECT SITE_NAME,DEVICE_SN,SITE_SN,IMSI,IMEI,STMSI, MAC,LATYPE,INDICATION, REALTIME,CAPTURE_TIME,RARTA,CREATE_TIME, CITY_NAME FROM `${srcTableName}` ${whereSql} 
+    </insert>
+
+    <resultMap type="com.iekun.ef.model.UeInfo" id="DataCollideResultMap" >
+        <id column="ID" jdbcType="BIGINT" property="id" />
+        <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+        <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+        <result column="IMSI" jdbcType="VARCHAR" property="imsi" />
+        <result column="IMEI" jdbcType="VARCHAR" property="imei" />
+        <result column="STMSI" jdbcType="VARCHAR" property="stmsi" />
+        <result column="MAC" jdbcType="VARCHAR" property="mac" />
+        <result column="LATYPE" jdbcType="VARCHAR" property="latype" />
+        <result column="INDICATION" jdbcType="TINYINT" property="indication" />
+        <result column="REALTIME" jdbcType="BIT" property="realtime" />
+        <result column="CAPTURE_TIME" jdbcType="VARCHAR" property="captureTime" />
+        <result column="RARTA" jdbcType="BIGINT" property="rarta" />
+        <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+        <result column="CITY_NAME" jdbcType="VARCHAR" property="cityName" />
+        <result column="BAND" jdbcType="VARCHAR" property="band" />
+        <result column="OPERATOR" jdbcType="VARCHAR" property="operator" />
+        <result column="SITE_SN" jdbcType="VARCHAR" property="siteSn" />
+        <result column="DEVICE_NAME" jdbcType="VARCHAR" property="deviceName" />
+    </resultMap>
+
+    <select id="getShardingDataCollideUeInfoList" resultMap="DataCollideResultMap">
+        SELECT TUI.*, TD.NAME as DEVICE_NAME
+        FROM `${sumUeIfnoTable}` TUI
+        LEFT JOIN t_device TD
+        ON TD.SN = TUI.DEVICE_SN
+        AND TD.DELETE_FLAG = 0
+        WHERE TUI.IMSI IN ( SELECT T.IMSI FROM `${tableName}` T )
+        ORDER BY TUI.IMSI
+    </select>
+
+</mapper>

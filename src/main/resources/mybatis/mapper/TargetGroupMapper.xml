@@ -1,0 +1,261 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.TargetGroupMapper">
+
+    <resultMap id="BaseResultMap" type="com.iekun.ef.model.TargetGroup">
+        <id column="ID"  property="id" />
+        <result column="NAME"  property="name" />
+        <result column="CREATOR_ID"  property="creator_id" />
+        <result column="WARNING"  property="warning" />
+        <result column="CREATE_TIME"  property="create_time" />
+        <result column="OVERDUE_TIME"  property="overdue_time" />
+        <result column="REMARK"  property="remark" />
+        <result column="SITE"  property="site" />
+        <result column="CREATOR_NAME" property="creator_name" />
+    </resultMap>
+
+    <resultMap id="BaseResultMap1" type="com.iekun.ef.model.TargetRule">
+        <id column="ID"  property="id" />
+        <result column="NAME"  property="name" />
+        <result column="IMSI"  property="imsi" />
+        <result column="IMEI"  property="imei" />
+        <result column="MAC"  property="mac" />
+        <result column="TARGET_TYPE"  property="targetType" />
+        <result column="RECEIVER"  property="receiver" />
+        <result column="SMS_TIME"  property="smsTime" />
+        <result column="LATEST_DEVICE_SN"  property="latestDeviceSn" />
+        <result column="REMARK" property="remark" />
+        <result column="DELETE_FLAG" property="deleteFlag"/>
+        <result column="CREATE_TIME" property="createTime"/>
+        <result column="UPDATE_TIME" property="updateTime"/>
+        <result column="CREATOR_ID" property="creatorId"/>
+        <result column="IDCARD" property="idCard"/>
+        <result column="PHONE" property="phone"/>
+    </resultMap>
+
+    <resultMap id="BaseResultMap2" type="com.iekun.ef.model.Site">
+        <id column="ID"  property="id" />
+        <result column="NAME"  property="name" />
+    </resultMap>
+
+    <sql id="Column_list">
+        ID,NAME,CREATOR_ID,WARNING,CREATE_TIME,OVERDUE_TIME,REMARK,SITE,CREATOR_NAME
+    </sql>
+
+    <!--通过站点ID查询对应的站点信息-->
+    <select id="querySitesBySiteId" parameterType="java.lang.Long" resultType="com.iekun.ef.model.Site">
+        SELECT
+            ID,NAME,PROVINCE_ID,PROVINCE_NAME,CITY_ID,CITY_NAME,TOWN_ID,TOWN_NAME
+        from
+            t_site
+        where
+            ID = #{siteId}
+    </select>
+
+    <!--通过用户ID查询对应的站点-->
+    <select id="querySiteByUserId" parameterType="java.lang.Long" resultType="com.iekun.ef.model.Site">
+        SELECT
+            a.ID,a.NAME,a.PROVINCE_ID,a.PROVINCE_NAME,a.CITY_ID,a.CITY_NAME,a.TOWN_ID,a.TOWN_NAME
+        from
+            t_site a,t_site_user b
+        where
+            b.USER_ID = #{userId}
+        and
+            a.ID = b.SITE_ID
+        and
+            a.DELETE_FLAG = 0
+        and
+            b.DELETE_FLAG = 0
+    </select>
+
+    <!--查询所有分组-->
+    <select id="queryAllGroup" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        SELECT
+        a.ID,a.NAME,a.CREATOR_ID,a.WARNING,a.CREATE_TIME,a.OVERDUE_TIME,
+        a.REMARK,a.SITE,a.CREATOR_NAME
+        FROM
+        t_group a
+        WHERE
+        a.CREATOR_ID = #{userId}
+        order by
+        CREATOR_NAME desc
+    </select>
+
+    <!--查询每个分组人数-->
+    <select id="queryGroupCount" parameterType="java.lang.String" resultType="int">
+        SELECT
+        count(*)
+        FROM
+        t_target_rule
+        WHERE
+        creator_id = #{groupId}
+    </select>
+
+    <!--查询每个分组对应的黑名单人员信息 -->
+    <select id="queryBlacklist" parameterType="java.lang.String" resultMap="BaseResultMap1">
+        SELECT
+            ID,NAME,IMSI,IMEI,MAC,TARGET_TYPE,RECEIVER,SMS_TIME,LATEST_DEVICE_SN,REMARK,DELETE_FLAG,CREATE_TIME,UPDATE_TIME,CREATOR_ID,IDCARD,PHONE
+        FROM
+            t_target_rule
+        WHERE
+            CREATOR_ID = #{groupId}
+    </select>
+
+    <!--删除分组中的一个黑名单人员-->
+    <delete id="delGroupTarget" parameterType="com.iekun.ef.model.TargetRule">
+        delete from t_target_rule where ID=#{id} and IMSI=#{imsi}
+    </delete>
+
+    <!--查询所有站点信息-->
+    <select id="queryAllSiteByUserId" resultMap="BaseResultMap2">
+        select distinct a.id,a.name from t_site a,t_site_user b where a.id=b.site_id  and b.DELETE_FLAG=0 and b.user_id=#{userId}
+    </select>
+
+    <!--创建分组-->
+    <insert id="addGroup" parameterType="com.iekun.ef.model.TargetGroup" >
+        insert into t_group (ID,NAME,CREATOR_ID,WARNING,CREATE_TIME,OVERDUE_TIME,REMARK,SITE,CREATOR_NAME)
+        values (#{id},#{name}, #{creator_id},#{warning}, #{create_time}, #{overdue_time},#{remark}, #{site},#{creator_name})
+    </insert>
+
+    <!--获取创建人姓名-->
+    <select id="queryCreatorName" parameterType="java.lang.Long" resultType="java.lang.String">
+        select USER_NAME from t_user where ID = #{creatorId}
+    </select>
+
+    <!--删除分组-->
+    <delete id="delGrouplist" parameterType="java.util.HashMap" >
+        delete from t_group where ID in
+        <foreach collection="groupIds" item="groupId" open="(" close=")" separator=",">
+            #{groupId}
+        </foreach>
+    </delete>
+
+    <!--删除分组中的人员信息-->
+    <delete id="delGroupPerson" parameterType="java.util.HashMap" >
+        delete from t_target_rule where CREATOR_ID in
+        <foreach collection="groupIds" item="groupId" open="(" close=")" separator=",">
+            #{groupId}
+        </foreach>
+    </delete>
+
+    <!--删除分组和站点的映射关系-->
+    <delete id="delGroupSite">
+        delete from t_site_group where GROUP_id in
+        <foreach collection="groupIds" item="groupId" open="(" close=")" separator=",">
+            #{groupId}
+        </foreach>
+    </delete>
+
+    <!--读取Excel添加黑名单人员-->
+    <insert id="addExcelTargetPerson" parameterType="com.iekun.ef.model.TargetRule">
+        insert into t_target_rule
+        (NAME,IMSI,IMEI,MAC,TARGET_TYPE,RECEIVER,SMS_TIME,LATEST_DEVICE_SN,
+        REMARK,DELETE_FLAG,CREATE_TIME,UPDATE_TIME,CREATOR_ID,IDCARD,PHONE)
+        values
+        (#{name},#{imsi},#{imei},#{mac},#{targetType},#{receiver},#{smsTime},
+        #{latestDeviceSn},#{remark},#{deleteFlag},#{createTime},#{updateTime},#{creatorId},#{idCard},#{phone})
+    </insert>
+
+    <!--通过站点ID查询站点名字-->
+    <select id="querySiteBySiteId" parameterType="java.lang.Long" resultType="java.lang.String">
+        select Name from t_site where ID = #{siteId}
+    </select>
+
+    <!--补录黑名单人员-->
+    <insert id="addOneTarget" parameterType="com.iekun.ef.model.TargetRule">
+        insert into t_target_rule (NAME,IMSI,REMARK,CREATE_TIME,UPDATE_TIME,CREATOR_ID,IDCARD,PHONE)
+        values(#{name},#{imsi},#{remark},#{createTime},#{updateTime},#{creatorId},#{idCard},#{phone})
+    </insert>
+
+    <select id="selectCountByGroupIdAndImsi" parameterType="java.util.Map" resultMap="BaseResultMap1">
+        select
+            *
+        from
+            t_target_rule
+        where
+            IMSI = #{imsi}
+        and
+            CREATOR_ID = #{creatorId}
+    </select>
+
+    <!--删除分组站点映射-->
+    <delete id="delSiteAndGroup" parameterType="java.util.Map">
+        delete from t_site_group where SITE_ID=${siteId} and GROUP_ID=#{groupId}
+    </delete>
+
+    <!--添加分组站点映射-->
+    <insert id="insertSiteAndGroup" parameterType="java.util.Map">
+        insert into t_site_group (SITE_ID,GROUP_ID) values(${siteId},#{groupId});
+    </insert>
+
+    <!--通过站点名字查询站点ID-->
+    <select id="querySiteIdBySiteName" parameterType="java.lang.String" resultType="java.lang.Long">
+        select ID from t_site where NAME = #{siteName}
+    </select>
+
+    <!--更新分组信息-->
+    <update id="updateGroup" parameterType="com.iekun.ef.model.TargetGroup">
+        update t_group set
+            NAME = #{name},
+            CREATOR_ID = #{creator_id},
+            WARNING = #{warning},
+            CREATE_TIME = #{create_time},
+            OVERDUE_TIME = #{overdue_time},
+            REMARK = #{remark},
+            SITE = #{site},
+            CREATOR_NAME = #{creator_name}
+        where
+            ID = #{id}
+    </update>
+
+    <!--查看分组名字是否已经存在-->
+    <select id="queryGroupByName" parameterType="java.lang.String" resultType="com.iekun.ef.model.TargetGroup">
+        select
+            ID,NAME
+        from
+            t_group
+        where
+            NAME = #{groupName}
+    </select>
+
+    <!--查询此分组下所有的IMSI号码-->
+    <select id="queryAllImsiByGroupId" parameterType="java.lang.String" resultType="java.lang.String">
+        select
+             IMSI
+        from
+             t_target_rule
+        where
+            CREATOR_ID = #{groupId}
+    </select>
+
+    <!--批量添加黑名单人员-->
+    <insert id="insertExcel" parameterType="java.util.List">
+        insert into t_target_rule
+            (NAME,IMSI,IMEI,MAC,TARGET_TYPE,RECEIVER,SMS_TIME,LATEST_DEVICE_SN,
+            REMARK,DELETE_FLAG,CREATE_TIME,UPDATE_TIME,CREATOR_ID,IDCARD,PHONE)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.name},#{item.imsi},#{item.imei},#{item.mac},#{item.targetType},#{item.receiver},#{item.smsTime},
+            #{item.latestDeviceSn},#{item.remark},#{item.deleteFlag},#{item.createTime},#{item.updateTime},#{item.creatorId},#{item.idCard},#{item.phone})
+        </foreach>
+    </insert>
+
+    <!--通过站点Id查询对应的站点名字-->
+    <select id="querySiteNameById" parameterType="java.lang.Long" resultType="java.lang.String">
+        select
+            NAME
+        from
+            t_site
+        where
+            ID = #{siteId}
+    </select>
+
+    <delete id="delGroupSiteMappingByGroupId" parameterType="java.lang.String">
+        delete from t_site_group where GROUP_ID=#{groupIdUp}
+    </delete>
+
+    <select id="querySiteIdsByGroupId" parameterType="java.lang.String" resultType="java.lang.Long">
+        select SITE_ID from t_site_group where GROUP_ID = #{groupId}
+    </select>
+
+</mapper>

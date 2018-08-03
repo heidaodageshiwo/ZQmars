@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.DeviceDetailsMapper">
+    <resultMap type="com.iekun.ef.model.Site" id="BaseResultMap">
+        <id column="ID" jdbcType="BIGINT" property="id"/>
+        <result column="SN" jdbcType="VARCHAR" property="sn"/>
+        <result column="NAME" jdbcType="VARCHAR" property="name"/>
+        <result column="LONGITUDE" jdbcType="VARCHAR" property="longitude"/>
+        <result column="LATITUDE" jdbcType="VARCHAR" property="latitude"/>
+        <result column="ADDRESS" jdbcType="VARCHAR" property="address"/>
+        <result column="REMARK" jdbcType="VARCHAR" property="remark"/>
+        <result column="DELETE_FLAG" jdbcType="BIT" property="deleteFlag"/>
+        <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime"/>
+        <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime"/>
+        <result column="CITY_CODE" jdbcType="VARCHAR" property="cityCode"/>
+        <result column="ZIP_CODE" jdbcType="VARCHAR" property="zipCode"/>
+        <result column="PROVINCE_ID" jdbcType="BIGINT" property="province_id"/>
+        <result column="CITY_ID" jdbcType="BIGINT" property="city_id"/>
+        <result column="TOWN_ID" jdbcType="BIGINT" property="town_id"/>
+        <result column="PROVINCE_NAME" jdbcType="VARCHAR" property="province_name"/>
+        <result column="CITY_NAME" jdbcType="VARCHAR" property="city_name"/>
+        <result column="TOWN_NAME" jdbcType="VARCHAR" property="town_name"/>
+
+    </resultMap>
+
+    <resultMap type="com.iekun.ef.model.Device" id="BaseResultMapdevice">
+        <id column="ID" jdbcType="BIGINT" property="id"/>
+        <result column="SITE_ID" jdbcType="BIGINT" property="siteId"/>
+        <result column="SN" jdbcType="VARCHAR" property="sn"/>
+        <result column="NAME" jdbcType="VARCHAR" property="name"/>
+        <result column="TYPE" jdbcType="TINYINT" property="type"/>
+        <result column="BAND" jdbcType="VARCHAR" property="band"/>
+        <result column="OPERATOR" jdbcType="VARCHAR" property="operator"/>
+        <result column="MANUFACTURER" jdbcType="VARCHAR" property="manufacturer"/>
+        <result column="REMARK" jdbcType="VARCHAR" property="remark"/>
+        <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime"/>
+        <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime"/>
+        <result column="DELETE_FLAG" jdbcType="BIT" property="deleteFlag"/>
+    </resultMap>
+
+    <resultMap type="com.iekun.ef.model.DeviceDetailsCount" id="BaseResultMapDeviceDetailsCount">
+        <result column="OPERATOR" jdbcType="VARCHAR" property="operator"/>
+        <result column="SUM" jdbcType="VARCHAR" property="sum"/>
+    </resultMap>
+
+    <sql id="Base_Column_List">
+      ID, SN, NAME, LONGITUDE, LATITUDE, ADDRESS, REMARK, DELETE_FLAG, CREATE_TIME, UPDATE_TIME,
+      CITY_CODE, ZIP_CODE, PROVINCE_ID, CITY_ID, TOWN_ID, PROVINCE_NAME, CITY_NAME, TOWN_NAME,LC,CI
+    </sql>
+    <sql id="Base_Column_List_device">
+      ID, SITE_ID, SN, NAME, TYPE, BAND, OPERATOR, MANUFACTURER, REMARK, CREATE_TIME, UPDATE_TIME,
+      DELETE_FLAG
+    </sql>
+
+
+    <select id="selectSiteListByUserId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+          SELECT S.ID,
+             S.SN,
+			 S.NAME,
+			 S.LONGITUDE,
+			 S.LATITUDE,
+			 S.ADDRESS,
+			 S.REMARK,
+			 S.DELETE_FLAG,
+			 S.CREATE_TIME,
+			 S.UPDATE_TIME,
+			 S.CITY_CODE,
+			 S.ZIP_CODE,
+			 S.PROVINCE_ID,
+			 S.CITY_ID,
+			 S.TOWN_ID,
+			 S.PROVINCE_NAME,
+			 S.CITY_NAME,
+			 S.TOWN_NAME,
+			 S.LC,
+			 S.CI
+			from t_site S
+			LEFT JOIN t_site_user SU ON SU.SITE_ID = S.ID
+			WHERE SU.USER_ID = #{userId,jdbcType=BIGINT} AND SU.DELETE_FLAG=0 AND S.DELETE_FLAG = 0
+			GROUP BY (ID)
+    </select>
+
+
+    <select id="selectDeviceDetailsBySiteId" parameterType="java.lang.Long" resultMap="BaseResultMapdevice">
+        select
+        <include refid="Base_Column_List_device"/>
+        from t_device
+        where SITE_ID = #{siteId,jdbcType=BIGINT}
+        and DELETE_FLAG = 0
+    </select>
+
+    <select id="getTableName" parameterType="String" resultType="String">
+      SELECT SHARDING_TAB_NAME AS tableName FROM t_sharding_tab_info WHERE SHARDING_TAB_DATE=#{date}
+    </select>
+
+    <select id="getDeviceDetailsCountlist" resultMap="BaseResultMapDeviceDetailsCount">
+      SELECT operator ,COUNT(*) AS SUM FROM ${table} WHERE DEVICE_SN =#{devicesn} GROUP BY operator
+    </select>
+
+</mapper>

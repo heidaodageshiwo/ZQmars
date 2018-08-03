@@ -1,0 +1,813 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.DeviceLicenseMapper">
+  <resultMap  type="com.iekun.ef.model.DeviceLicense" id="BaseResultMap">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+    <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+    <result column="UPLOAD_USER" jdbcType="VARCHAR" property="uploadUser" />
+    <result column="UPLOAD_TIME" jdbcType="VARCHAR" property="uploadTime" />
+    <result column="SCHEDULE_TIME" jdbcType="VARCHAR" property="scheduleTime" />
+    <result column="FILE_URL" jdbcType="VARCHAR" property="fileUrl" />
+    <result column="RETRTIES" jdbcType="TINYINT" property="retrties" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime" />
+    <result column="BEXPIRE_TIME" jdbcType="VARCHAR" property="bExpireTime" />
+    <result column="AEXPIRE_TIME" jdbcType="VARCHAR" property="aExpireTime" />
+    <result column="CHECK_SUM" jdbcType="VARCHAR" property="checkSum" />
+    <result column="STATUS_FLAG" jdbcType="TINYINT" property="statusFlag" />
+    
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, SITE_NAME, DEVICE_SN, UPLOAD_USER, UPLOAD_TIME, SCHEDULE_TIME, FILE_URL, RETRTIES, 
+    CREATE_TIME, UPDATE_TIME, STATUS_FLAG
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.DeviceLicenseExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_device_license
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_device_license
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <select id="getDeviceLicenseList"  resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_device_license
+    where 1=1
+  </select>
+  
+  <select id="selectDvLicenseList" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select * from (select * from (select
+    TDL.ID,
+    TDL.SITE_NAME,
+    TDL.DEVICE_SN,
+    TDL.BEXPIRE_TIME,
+    TDL.AEXPIRE_TIME,
+    TS.SN,
+    TDL.CREATE_TIME,
+    TDL.UPDATE_TIME,
+    TDL.STATUS_FLAG
+    from t_device_license TDL
+       	left join t_site TS on TS.NAME = TDL.SITE_NAME
+    where 1=1
+     <if test="deviceSn != null">  
+     AND TDL.DEVICE_SN = #{deviceSn}  
+    </if> 
+    <if test="status != null">  
+     AND TDL.STATUS_FLAG = #{status}  
+    </if> 
+    <if test="startDate != null">  
+      AND TDL.CREATE_TIME > #{startDate} AND  #{endDate} > TDL.CREATE_TIME
+    </if>) as tempTable
+    <if test="sites!=null">
+      where SN in
+      <foreach  item="item" collection="sites"
+               index="index" open="(" close=")" separator=",">
+        #{item.sn,jdbcType=VARCHAR}
+      </foreach>
+    </if> ) as finalTable  where 1=1
+   <if test="start != null and length != null"> 
+      order by CREATE_TIME DESC
+      limit #{start}, #{length}
+    </if>
+  </select>
+  
+  <select id="selectUnsendDvLicenseList" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select
+    ID,
+    SITE_NAME,
+    DEVICE_SN,
+    BEXPIRE_TIME,
+    AEXPIRE_TIME,
+    UPDATE_TIME,
+    CHECK_SUM,
+    RETRTIES,
+    FILE_URL
+    from t_device_license
+    where 1=1
+    <if test="maxRetries != null">  
+     AND #{maxRetries} > RETRTIES
+    </if> 
+    <if test="status != null">  
+     AND STATUS_FLAG = #{status}  
+    </if> 
+   </select>
+  
+  
+  <select id="getDvLicenseCnt" parameterType="java.util.Map" resultType="java.lang.Long">
+    select count(1) from ( select * from (select
+    TDL.ID,
+    TDL.SITE_NAME,
+    TDL.DEVICE_SN,
+    TS.SN,
+    TDL.UPDATE_TIME
+    from t_device_license TDL
+       	left join t_site TS on TS.NAME = TDL.SITE_NAME
+    where 1=1
+     <if test="deviceSn != null">  
+     AND TDL.DEVICE_SN = #{deviceSn}  
+    </if> 
+    <if test="status != null">  
+     AND TDL.STATUS_FLAG = #{status}  
+    </if> 
+    <if test="startDate != null">  
+      AND TDL.CREATE_TIME > #{startDate} AND  #{endDate} > TDL.CREATE_TIME
+    </if> ) as t_device_license_temp 
+    <if test="sites!=null">
+      where SN in
+      <foreach  item="item" collection="sites"
+               index="index" open="(" close=")" separator=",">
+        #{item.sn,jdbcType=VARCHAR}
+      </foreach>
+    </if> )as finalTable
+   </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_device_license
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.DeviceLicenseExample">
+    delete from t_device_license
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.DeviceLicense">
+    insert into t_device_license (ID, SITE_NAME, DEVICE_SN, 
+      UPLOAD_USER, UPLOAD_TIME, SCHEDULE_TIME, 
+      FILE_URL, RETRTIES, CREATE_TIME, 
+      UPDATE_TIME, STATUS_FLAG)
+    values (#{id,jdbcType=BIGINT}, #{siteName,jdbcType=VARCHAR}, #{deviceSn,jdbcType=VARCHAR}, 
+      #{uploadUser,jdbcType=VARCHAR}, #{uploadTime,jdbcType=VARCHAR}, #{scheduleTime,jdbcType=VARCHAR}, 
+      #{fileUrl,jdbcType=VARCHAR}, #{retrties,jdbcType=TINYINT}, #{createTime,jdbcType=VARCHAR}, 
+      #{updateTime,jdbcType=VARCHAR}, #{statusFlag,jdbcType=TINYINT})
+  </insert>
+   <insert id="insertDeviceLicense" parameterType="java.util.Map">
+    insert into t_device_license
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="siteName != null">
+        SITE_NAME,
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN,
+      </if>
+      <if test="uploadUser != null">
+        UPLOAD_USER,
+      </if>
+      <if test="uploadTime != null">
+        UPLOAD_TIME,
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME,
+      </if>
+      <if test="scheduleTime != null">
+        SCHEDULE_TIME,
+      </if>
+      <if test="fileUrl != null">
+        FILE_URL,
+      </if>
+      <if test="retries != null">
+        RETRTIES,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="checksum != null">
+        CHECK_SUM,
+      </if>
+      <if test="statusFlag != null">
+        STATUS_FLAG
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="siteName != null">
+        #{siteName},
+      </if>
+      <if test="deviceSn != null">
+        #{deviceSn},
+      </if>
+      <if test="uploadUser != null">
+        #{uploadUser},
+      </if>
+      <if test="uploadTime != null">
+        #{uploadTime},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime},
+      </if>
+      <if test="scheduleTime != null">
+        #{scheduleTime},
+      </if>
+      <if test="fileUrl != null">
+        #{fileUrl},
+      </if>
+      <if test="retries != null">
+        #{retries},
+      </if>
+      <if test="createTime != null">
+        #{createTime},
+      </if>
+      <if test="checksum != null">
+        #{checksum},
+      </if>
+     <if test="statusFlag != null">
+        #{statusFlag}
+      </if>
+    </trim>
+  </insert>
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.DeviceLicense">
+    insert into t_device_license
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="siteName != null">
+        SITE_NAME,
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN,
+      </if>
+      <if test="uploadUser != null">
+        UPLOAD_USER,
+      </if>
+      <if test="uploadTime != null">
+        UPLOAD_TIME,
+      </if>
+      <if test="scheduleTime != null">
+        SCHEDULE_TIME,
+      </if>
+      <if test="fileUrl != null">
+        FILE_URL,
+      </if>
+      <if test="retrties != null">
+        RETRTIES,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME,
+      </if>
+      <if test="statusFlag != null">
+        STATUS_FLAG,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="siteName != null">
+        #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadUser != null">
+        #{uploadUser,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadTime != null">
+        #{uploadTime,jdbcType=VARCHAR},
+      </if>
+      <if test="scheduleTime != null">
+        #{scheduleTime,jdbcType=VARCHAR},
+      </if>
+      <if test="fileUrl != null">
+        #{fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="retrties != null">
+        #{retrties,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="statusFlag != null">
+        #{statusFlag,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.DeviceLicenseExample" resultType="java.lang.Integer">
+    select count(*) from t_device_license
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_device_license
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.siteName != null">
+        SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deviceSn != null">
+        DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="record.uploadUser != null">
+        UPLOAD_USER = #{record.uploadUser,jdbcType=VARCHAR},
+      </if>
+      <if test="record.uploadTime != null">
+        UPLOAD_TIME = #{record.uploadTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.scheduleTime != null">
+        SCHEDULE_TIME = #{record.scheduleTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fileUrl != null">
+        FILE_URL = #{record.fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.retrties != null">
+        RETRTIES = #{record.retrties,jdbcType=TINYINT},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.updateTime != null">
+        UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.statusFlag != null">
+        STATUS_FLAG = #{record.statusFlag,jdbcType=TINYINT},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_device_license
+    set ID = #{record.id,jdbcType=BIGINT},
+      SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      UPLOAD_USER = #{record.uploadUser,jdbcType=VARCHAR},
+      UPLOAD_TIME = #{record.uploadTime,jdbcType=VARCHAR},
+      SCHEDULE_TIME = #{record.scheduleTime,jdbcType=VARCHAR},
+      FILE_URL = #{record.fileUrl,jdbcType=VARCHAR},
+      RETRTIES = #{record.retrties,jdbcType=TINYINT},
+      CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      STATUS_FLAG = #{record.statusFlag,jdbcType=TINYINT}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateUpgrade" parameterType="java.util.Map">
+    update t_device_license
+    <set>
+      <if test="result != null">
+        RESULT_DISCRIPTION = #{result},
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME = #{updateTime},
+      </if>
+       <if test="sucessTime != null">
+        SUCCESS_TIME = #{sucessTime},
+      </if>
+      <if test="statusFlag != null">
+        STATUS_FLAG = #{statusFlag},
+      </if>
+    </set>
+    where DEVICE_SN = #{deviceSn} and STATUS_FLAG = 0
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.DeviceLicense">
+    update t_device_license
+    <set>
+      <if test="siteName != null">
+        SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadUser != null">
+        UPLOAD_USER = #{uploadUser,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadTime != null">
+        UPLOAD_TIME = #{uploadTime,jdbcType=VARCHAR},
+      </if>
+      <if test="scheduleTime != null">
+        SCHEDULE_TIME = #{scheduleTime,jdbcType=VARCHAR},
+      </if>
+      <if test="fileUrl != null">
+        FILE_URL = #{fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="retrties != null">
+        RETRTIES = #{retrties,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="statusFlag != null">
+        STATUS_FLAG = #{statusFlag,jdbcType=TINYINT},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.DeviceLicense">
+    update t_device_license
+    set SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      UPLOAD_USER = #{uploadUser,jdbcType=VARCHAR},
+      UPLOAD_TIME = #{uploadTime,jdbcType=VARCHAR},
+      SCHEDULE_TIME = #{scheduleTime,jdbcType=VARCHAR},
+      FILE_URL = #{fileUrl,jdbcType=VARCHAR},
+      RETRTIES = #{retrties,jdbcType=TINYINT},
+      CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      STATUS_FLAG = #{statusFlag,jdbcType=TINYINT}
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <!-- <resultMap id="BaseResultMap" type="com.iekun.ef.model.DeviceLicense">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+    <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+    <result column="UPLOAD_USER" jdbcType="VARCHAR" property="uploadUser" />
+    <result column="UPLOAD_TIME" jdbcType="VARCHAR" property="uploadTime" />
+    <result column="COMPLETE_TIME" jdbcType="VARCHAR" property="completeTime" />
+    <result column="FILE_URL" jdbcType="VARCHAR" property="fileUrl" />
+    <result column="RETRTIES" jdbcType="TINYINT" property="retrties" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime" />
+    <result column="STATUS_FLAG" jdbcType="TINYINT" property="statusFlag" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, SITE_NAME, DEVICE_SN, UPLOAD_USER, UPLOAD_TIME, COMPLETE_TIME, FILE_URL, RETRTIES, 
+    CREATE_TIME, UPDATE_TIME, STATUS_FLAG
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.DeviceLicenseExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_device_license
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_device_license
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_device_license
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.DeviceLicenseExample">
+    delete from t_device_license
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.DeviceLicense">
+    insert into t_device_license (ID, SITE_NAME, DEVICE_SN, 
+      UPLOAD_USER, UPLOAD_TIME, COMPLETE_TIME, 
+      FILE_URL, RETRTIES, CREATE_TIME, 
+      UPDATE_TIME, STATUS_FLAG)
+    values (#{id,jdbcType=BIGINT}, #{siteName,jdbcType=VARCHAR}, #{deviceSn,jdbcType=VARCHAR}, 
+      #{uploadUser,jdbcType=VARCHAR}, #{uploadTime,jdbcType=VARCHAR}, #{completeTime,jdbcType=VARCHAR}, 
+      #{fileUrl,jdbcType=VARCHAR}, #{retrties,jdbcType=TINYINT}, #{createTime,jdbcType=VARCHAR}, 
+      #{updateTime,jdbcType=VARCHAR}, #{statusFlag,jdbcType=TINYINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.DeviceLicense">
+    insert into t_device_license
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="siteName != null">
+        SITE_NAME,
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN,
+      </if>
+      <if test="uploadUser != null">
+        UPLOAD_USER,
+      </if>
+      <if test="uploadTime != null">
+        UPLOAD_TIME,
+      </if>
+      <if test="completeTime != null">
+        COMPLETE_TIME,
+      </if>
+      <if test="fileUrl != null">
+        FILE_URL,
+      </if>
+      <if test="retrties != null">
+        RETRTIES,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME,
+      </if>
+      <if test="statusFlag != null">
+        STATUS_FLAG,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="siteName != null">
+        #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadUser != null">
+        #{uploadUser,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadTime != null">
+        #{uploadTime,jdbcType=VARCHAR},
+      </if>
+      <if test="completeTime != null">
+        #{completeTime,jdbcType=VARCHAR},
+      </if>
+      <if test="fileUrl != null">
+        #{fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="retrties != null">
+        #{retrties,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="statusFlag != null">
+        #{statusFlag,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.DeviceLicenseExample" resultType="java.lang.Integer">
+    select count(*) from t_device_license
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_device_license
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.siteName != null">
+        SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deviceSn != null">
+        DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="record.uploadUser != null">
+        UPLOAD_USER = #{record.uploadUser,jdbcType=VARCHAR},
+      </if>
+      <if test="record.uploadTime != null">
+        UPLOAD_TIME = #{record.uploadTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.completeTime != null">
+        COMPLETE_TIME = #{record.completeTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fileUrl != null">
+        FILE_URL = #{record.fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.retrties != null">
+        RETRTIES = #{record.retrties,jdbcType=TINYINT},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.updateTime != null">
+        UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.statusFlag != null">
+        STATUS_FLAG = #{record.statusFlag,jdbcType=TINYINT},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_device_license
+    set ID = #{record.id,jdbcType=BIGINT},
+      SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      UPLOAD_USER = #{record.uploadUser,jdbcType=VARCHAR},
+      UPLOAD_TIME = #{record.uploadTime,jdbcType=VARCHAR},
+      COMPLETE_TIME = #{record.completeTime,jdbcType=VARCHAR},
+      FILE_URL = #{record.fileUrl,jdbcType=VARCHAR},
+      RETRTIES = #{record.retrties,jdbcType=TINYINT},
+      CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      STATUS_FLAG = #{record.statusFlag,jdbcType=TINYINT}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.DeviceLicense">
+    update t_device_license
+    <set>
+      <if test="siteName != null">
+        SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadUser != null">
+        UPLOAD_USER = #{uploadUser,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadTime != null">
+        UPLOAD_TIME = #{uploadTime,jdbcType=VARCHAR},
+      </if>
+      <if test="completeTime != null">
+        COMPLETE_TIME = #{completeTime,jdbcType=VARCHAR},
+      </if>
+      <if test="fileUrl != null">
+        FILE_URL = #{fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="retrties != null">
+        RETRTIES = #{retrties,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="statusFlag != null">
+        STATUS_FLAG = #{statusFlag,jdbcType=TINYINT},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.DeviceLicense">
+    update t_device_license
+    set SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      UPLOAD_USER = #{uploadUser,jdbcType=VARCHAR},
+      UPLOAD_TIME = #{uploadTime,jdbcType=VARCHAR},
+      COMPLETE_TIME = #{completeTime,jdbcType=VARCHAR},
+      FILE_URL = #{fileUrl,jdbcType=VARCHAR},
+      RETRTIES = #{retrties,jdbcType=TINYINT},
+      CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      STATUS_FLAG = #{statusFlag,jdbcType=TINYINT}
+    where ID = #{id,jdbcType=BIGINT}
+  </update> -->
+</mapper>

@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.TargetAlarmNewEntityMapper">
+    <resultMap id="BaseResultMap" type="com.iekun.ef.model.TargetAlarmNewEntity">
+        <id column="ID" jdbcType="BIGINT" property="id" />
+        <id column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+        <result column="GROUP_USERID" jdbcType="VARCHAR" property="groupUserid" />
+        <result column="GROUP_ID" jdbcType="VARCHAR" property="groupId" />
+        <result column="GROUP_NAME" jdbcType="VARCHAR" property="groupName" />
+        <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+        <result column="SITE_SN" jdbcType="VARCHAR" property="siteSn" />
+        <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+        <result column="DEVICE_NAME" jdbcType="VARCHAR" property="deviceName" />
+        <result column="IMSI" jdbcType="VARCHAR" property="imsi" />
+        <result column="IMEI" jdbcType="VARCHAR" property="imei" />
+        <result column="STMSI" jdbcType="VARCHAR" property="stmsi" />
+        <result column="MAC" jdbcType="VARCHAR" property="mac" />
+        <result column="LATYPE" jdbcType="VARCHAR" property="latype" />
+        <result column="INDICATION" jdbcType="TINYINT" property="indication" />
+        <result column="REALTIME" jdbcType="BIT" property="realtime" />
+        <result column="CAPTURE_TIME" jdbcType="VARCHAR" property="captureTime" />
+        <result column="RARTA" jdbcType="BIGINT" property="rarta" />
+        <result column="CITY_NAME" jdbcType="VARCHAR" property="cityName" />
+        <result column="CITY_CODE" jdbcType="VARCHAR" property="cityCode" />
+        <result column="BAND" jdbcType="VARCHAR" property="band" />
+        <result column="OPERATOR" jdbcType="VARCHAR" property="operator" />
+        <result column="IS_READ" jdbcType="BIT" property="isRead" />
+        <result column="IS_PARSE" jdbcType="BIT" property="isParse" />
+        <result column="IS_SMS" jdbcType="BIT" property="isSms" />
+        <result column="TARGET_NAME" jdbcType="VARCHAR" property="targetName" />
+        <result column="TARGET_ID" jdbcType="VARCHAR" property="targetId" />
+        <result column="TARGET_PHONE" jdbcType="VARCHAR" property="targetPhone" />
+    </resultMap>
+    <delete id="deleteByPrimaryKey" parameterType="map">
+        delete from t_target_alarm_new
+        where ID = #{id,jdbcType=BIGINT}
+        and CREATE_TIME = #{createTime,jdbcType=VARCHAR}
+    </delete>
+    <insert id="insert" parameterType="com.iekun.ef.model.TargetAlarmNewEntity">
+        insert into t_target_alarm_new (ID, CREATE_TIME, GROUP_USERID,
+        GROUP_ID, GROUP_NAME, SITE_NAME,
+        SITE_SN, DEVICE_SN, DEVICE_NAME,
+        IMSI, IMEI, STMSI,
+        MAC, LATYPE, INDICATION,
+        REALTIME, CAPTURE_TIME, RARTA,
+        CITY_NAME, CITY_CODE, BAND,
+        OPERATOR, IS_READ, IS_PARSE,
+        IS_SMS, TARGET_NAME, TARGET_ID,
+        TARGET_PHONE)
+        values (#{id,jdbcType=BIGINT}, #{createTime,jdbcType=VARCHAR}, #{groupUserid,jdbcType=VARCHAR},
+        #{groupId,jdbcType=VARCHAR}, #{groupName,jdbcType=VARCHAR}, #{siteName,jdbcType=VARCHAR},
+        #{siteSn,jdbcType=VARCHAR}, #{deviceSn,jdbcType=VARCHAR}, #{deviceName,jdbcType=VARCHAR},
+        #{imsi,jdbcType=VARCHAR}, #{imei,jdbcType=VARCHAR}, #{stmsi,jdbcType=VARCHAR},
+        #{mac,jdbcType=VARCHAR}, #{latype,jdbcType=VARCHAR}, #{indication,jdbcType=TINYINT},
+        #{realtime,jdbcType=BIT}, #{captureTime,jdbcType=VARCHAR}, #{rarta,jdbcType=BIGINT},
+        #{cityName,jdbcType=VARCHAR}, #{cityCode,jdbcType=VARCHAR}, #{band,jdbcType=VARCHAR},
+        #{operator,jdbcType=VARCHAR}, #{isRead,jdbcType=BIT}, #{isParse,jdbcType=BIT},
+        #{isSms,jdbcType=BIT}, #{targetName,jdbcType=VARCHAR}, #{targetId,jdbcType=VARCHAR},
+        #{targetPhone,jdbcType=VARCHAR})
+    </insert>
+    <insert id="insertBatch" parameterType="Map">
+        insert into t_target_alarm_new (CREATE_TIME, GROUP_USERID,
+        GROUP_ID, GROUP_NAME, SITE_NAME,
+        SITE_SN, DEVICE_SN, DEVICE_NAME,
+        IMSI, IMEI, STMSI,
+        MAC, LATYPE, INDICATION,
+        REALTIME, CAPTURE_TIME, RARTA,
+        CITY_NAME, CITY_CODE, BAND,
+        OPERATOR, IS_READ, IS_PARSE,
+        IS_SMS, TARGET_NAME, TARGET_ID,
+        TARGET_PHONE)
+        values
+        <foreach collection="entites" item="item" index="index" separator=",">
+            (#{createTime,jdbcType=VARCHAR}, #{groupUserid,jdbcType=VARCHAR},
+            #{groupId,jdbcType=VARCHAR}, #{groupName,jdbcType=VARCHAR}, #{siteName,jdbcType=VARCHAR},
+            #{siteSn,jdbcType=VARCHAR}, #{deviceSn,jdbcType=VARCHAR}, #{deviceName,jdbcType=VARCHAR},
+            #{imsi,jdbcType=VARCHAR}, #{imei,jdbcType=VARCHAR}, #{stmsi,jdbcType=VARCHAR},
+            #{mac,jdbcType=VARCHAR}, #{latype,jdbcType=VARCHAR}, #{indication,jdbcType=TINYINT},
+            #{realtime,jdbcType=BIT}, #{captureTime,jdbcType=VARCHAR}, #{rarta,jdbcType=BIGINT},
+            #{cityName,jdbcType=VARCHAR}, #{cityCode,jdbcType=VARCHAR}, #{band,jdbcType=VARCHAR},
+            #{operator,jdbcType=VARCHAR}, #{isRead,jdbcType=BIT}, #{isParse,jdbcType=BIT},
+            #{isSms,jdbcType=BIT}, #{targetName,jdbcType=VARCHAR}, #{targetId,jdbcType=VARCHAR},
+            #{targetPhone,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+    <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.TargetAlarmNewEntity">
+        update t_target_alarm_new
+        set GROUP_USERID = #{groupUserid,jdbcType=VARCHAR},
+        GROUP_ID = #{groupId,jdbcType=VARCHAR},
+        GROUP_NAME = #{groupName,jdbcType=VARCHAR},
+        SITE_NAME = #{siteName,jdbcType=VARCHAR},
+        SITE_SN = #{siteSn,jdbcType=VARCHAR},
+        DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+        DEVICE_NAME = #{deviceName,jdbcType=VARCHAR},
+        IMSI = #{imsi,jdbcType=VARCHAR},
+        IMEI = #{imei,jdbcType=VARCHAR},
+        STMSI = #{stmsi,jdbcType=VARCHAR},
+        MAC = #{mac,jdbcType=VARCHAR},
+        LATYPE = #{latype,jdbcType=VARCHAR},
+        INDICATION = #{indication,jdbcType=TINYINT},
+        REALTIME = #{realtime,jdbcType=BIT},
+        CAPTURE_TIME = #{captureTime,jdbcType=VARCHAR},
+        RARTA = #{rarta,jdbcType=BIGINT},
+        CITY_NAME = #{cityName,jdbcType=VARCHAR},
+        CITY_CODE = #{cityCode,jdbcType=VARCHAR},
+        BAND = #{band,jdbcType=VARCHAR},
+        OPERATOR = #{operator,jdbcType=VARCHAR},
+        IS_READ = #{isRead,jdbcType=BIT},
+        IS_PARSE = #{isParse,jdbcType=BIT},
+        IS_SMS = #{isSms,jdbcType=BIT},
+        TARGET_NAME = #{targetName,jdbcType=VARCHAR},
+        TARGET_ID = #{targetId,jdbcType=VARCHAR},
+        TARGET_PHONE = #{targetPhone,jdbcType=VARCHAR}
+        where ID = #{id,jdbcType=BIGINT}
+        and CREATE_TIME = #{createTime,jdbcType=VARCHAR}
+    </update>
+    <select id="selectByPrimaryKey" parameterType="map" resultMap="BaseResultMap">
+        select ID, CREATE_TIME, GROUP_USERID, GROUP_ID, GROUP_NAME, SITE_NAME, SITE_SN, DEVICE_SN,
+        DEVICE_NAME, IMSI, IMEI, STMSI, MAC, LATYPE, INDICATION, REALTIME, CAPTURE_TIME,
+        RARTA, CITY_NAME, CITY_CODE, BAND, OPERATOR, IS_READ, IS_PARSE, IS_SMS, TARGET_NAME,
+        TARGET_ID, TARGET_PHONE
+        from t_target_alarm_new
+        where ID = #{id,jdbcType=BIGINT}
+        and CREATE_TIME = #{createTime,jdbcType=VARCHAR}
+    </select>
+    <select id="selectAll" resultMap="BaseResultMap">
+        select ID, CREATE_TIME, GROUP_USERID, GROUP_ID, GROUP_NAME, SITE_NAME, SITE_SN, DEVICE_SN,
+        DEVICE_NAME, IMSI, IMEI, STMSI, MAC, LATYPE, INDICATION, REALTIME, CAPTURE_TIME,
+        RARTA, CITY_NAME, CITY_CODE, BAND, OPERATOR, IS_READ, IS_PARSE, IS_SMS, TARGET_NAME,
+        TARGET_ID, TARGET_PHONE
+        from t_target_alarm_new
+    </select>
+    <select id="selectCurTargetByNameStr" parameterType="map" resultMap="BaseResultMap">
+        select ID, CREATE_TIME, GROUP_USERID, GROUP_ID, GROUP_NAME, SITE_NAME, SITE_SN, DEVICE_SN,
+        DEVICE_NAME, IMSI, IMEI, STMSI, MAC, LATYPE, INDICATION, REALTIME, CAPTURE_TIME,
+        RARTA, CITY_NAME, CITY_CODE, BAND, OPERATOR, IS_READ, IS_PARSE, IS_SMS, TARGET_NAME,
+        TARGET_ID, TARGET_PHONE
+        from t_target_alarm_new
+        where
+        IS_READ = false
+        and
+        GROUP_USERID = ${userId}
+        <if test="targetName != null and targetName != ''">
+            and TARGET_NAME like concat('%', #{targetName}, '%')
+        </if>
+        <if test="type != null and type != ''">
+            and INDICATION = ${type}
+        </if>
+        <if test="imsi != null and imsi != ''">
+            and IMSI like concat('%', #{imsi}, '%')
+        </if>
+        order by CAPTURE_TIME desc
+    </select>
+
+    <select id="queryCountByParams" parameterType="map" resultType="java.lang.Integer">
+        select count(*)
+        from t_target_alarm_new
+        where
+        IS_READ = true
+        and
+        GROUP_USERID = ${userId}
+        <if test="hStartTime != null and hStartTime != ''">
+            and #{hStartTime} &lt;= CAPTURE_TIME
+        </if>
+        <if test="hEndTime != null and hEndTime != ''">
+            and #{hEndTime} &gt;= CAPTURE_TIME
+        </if>
+        <if test="hTargetName != null and hTargetName != ''">
+            and TARGET_NAME like concat('%', #{hTargetName}, '%')
+        </if>
+        <if test="hArea != null and hArea != ''">
+            and CITY_NAME like concat('%', #{hArea}, '%')
+        </if>
+        <if test="hSite != null and hSite != ''">
+            and SITE_SN = #{hSite}
+        </if>
+        <if test="hDevice != null and hDevice != ''">
+            and DEVICE_SN = #{hDevice}
+        </if>
+        <if test="hImsi != null and hImsi != ''">
+            and IMSI like concat('%', #{hImsi}, '%')
+        </if>
+        order by CAPTURE_TIME desc
+    </select>
+
+    <select id="queryHistoryAlarmDataLimit" parameterType="map" resultMap="BaseResultMap">
+        select ID, CREATE_TIME, GROUP_USERID, GROUP_ID, GROUP_NAME, SITE_NAME, SITE_SN, DEVICE_SN,
+        DEVICE_NAME, IMSI, IMEI, STMSI, MAC, LATYPE, INDICATION, REALTIME, CAPTURE_TIME,
+        RARTA, CITY_NAME, CITY_CODE, BAND, OPERATOR, IS_READ, IS_PARSE, IS_SMS, TARGET_NAME,
+        TARGET_ID, TARGET_PHONE
+        from t_target_alarm_new
+        where
+        IS_READ = true
+        and
+        GROUP_USERID = ${userId}
+        <if test="hStartTime != null and hStartTime != ''">
+            and #{hStartTime} &lt;= CAPTURE_TIME
+        </if>
+        <if test="hEndTime != null and hEndTime != ''">
+            and #{hEndTime} &gt;= CAPTURE_TIME
+        </if>
+        <if test="hTargetName != null and hTargetName != ''">
+            and TARGET_NAME like concat('%', #{hTargetName}, '%')
+        </if>
+        <if test="hArea != null and hArea != ''">
+            and CITY_NAME like concat('%', #{hArea}, '%')
+        </if>
+        <if test="hSite != null and hSite != ''">
+            and SITE_SN = #{hSite}
+        </if>
+        <if test="hDevice != null and hDevice != ''">
+            and DEVICE_SN = #{hDevice}
+        </if>
+        <if test="hImsi != null and hImsi != ''">
+            and IMSI like concat('%', #{hImsi}, '%')
+        </if>
+        order by CAPTURE_TIME desc
+        limit #{start},#{length}
+    </select>
+
+    <select id="selectAllHistoryDataByUserId" parameterType="map" resultMap="BaseResultMap">
+        select ID, CREATE_TIME, GROUP_USERID, GROUP_ID, GROUP_NAME, SITE_NAME, SITE_SN, DEVICE_SN,
+        DEVICE_NAME, IMSI, IMEI, STMSI, MAC, LATYPE, INDICATION, REALTIME, CAPTURE_TIME,
+        RARTA, CITY_NAME, CITY_CODE, BAND, OPERATOR, IS_READ, IS_PARSE, IS_SMS, TARGET_NAME,
+        TARGET_ID, TARGET_PHONE
+        from t_target_alarm_new
+        where
+        IS_READ = true
+        and
+        GROUP_USERID = ${userId}
+        <if test="hStartTime != null and hStartTime != ''">
+            and #{hStartTime} &lt;= CAPTURE_TIME
+        </if>
+        <if test="hEndTime != null and hEndTime != ''">
+            and #{hEndTime} &gt;= CAPTURE_TIME
+        </if>
+        <if test="hTargetName != null and hTargetName != ''">
+            and TARGET_NAME like concat('%', #{hTargetName}, '%')
+        </if>
+        <if test="hArea != null and hArea != ''">
+            and CITY_NAME like concat('%', #{hArea}, '%')
+        </if>
+        <if test="hSite != null and hSite != ''">
+            and SITE_SN = #{hSite}
+        </if>
+        <if test="hDevice != null and hDevice != ''">
+            and DEVICE_SN = #{hDevice}
+        </if>
+        <if test="hImsi != null and hImsi != ''">
+            and IMSI like concat('%', #{hImsi}, '%')
+        </if>
+        order by CAPTURE_TIME desc
+    </select>
+
+    <update id="updateReadedById" parameterType="Map">
+        update
+            t_target_alarm_new
+        set
+            IS_READ = true
+        where
+        GROUP_USERID = ${userID}
+        and
+        ID = ${alarmId}
+    </update>
+
+    <select id="queryAllBlackListAlarmCount" resultType="java.lang.Long">
+        select count(*) from t_target_alarm_new where INDICATION = 1
+    </select>
+    <select id="queryAllBlackAreaAlarmCount" resultType="java.lang.Long">
+        select count(*) from t_target_alarm_new where INDICATION = 2
+    </select>
+</mapper>

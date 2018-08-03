@@ -1,0 +1,805 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.DeviceMapper">
+  <resultMap  type="com.iekun.ef.model.Device" id="BaseResultMap">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="SITE_ID" jdbcType="BIGINT" property="siteId" />
+    <result column="SN" jdbcType="VARCHAR" property="sn" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="TYPE" jdbcType="TINYINT" property="type" />
+    <result column="BAND" jdbcType="VARCHAR" property="band" />
+    <result column="OPERATOR" jdbcType="VARCHAR" property="operator" />
+    <result column="MANUFACTURER" jdbcType="VARCHAR" property="manufacturer" />
+    <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime" />
+    <result column="DELETE_FLAG" jdbcType="BIT" property="deleteFlag" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, SITE_ID, SN, NAME, TYPE, BAND, OPERATOR, MANUFACTURER, REMARK, CREATE_TIME, UPDATE_TIME, 
+    DELETE_FLAG
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.DeviceExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_device
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_device
+    where ID = #{id,jdbcType=BIGINT} and DELETE_FLAG = 0
+  </select>
+  
+  <select id="selectByDevSN" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_device
+    where SN = #{SN,jdbcType=VARCHAR} and DELETE_FLAG = 0
+  </select>
+  
+  <select id="selectDevList" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_device
+    where 1=1
+  </select>
+    
+  <select id="selectDeviceDetailsBySiteId" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_device
+    where SITE_ID = #{siteId,jdbcType=BIGINT}
+    and DELETE_FLAG = 0
+   </select> 
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_device
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.DeviceExample">
+    delete from t_device
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.Device">
+    insert into t_device (ID, SITE_ID, SN, 
+      NAME, TYPE, BAND, OPERATOR, 
+      MANUFACTURER, REMARK, CREATE_TIME, 
+      UPDATE_TIME, DELETE_FLAG)
+    values (#{id,jdbcType=BIGINT}, #{siteId,jdbcType=BIGINT}, #{sn,jdbcType=VARCHAR}, 
+      #{name,jdbcType=VARCHAR}, #{type,jdbcType=TINYINT}, #{band,jdbcType=VARCHAR}, #{operator,jdbcType=VARCHAR}, 
+      #{manufacturer,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR}, 
+      #{updateTime,jdbcType=VARCHAR}, #{deleteFlag,jdbcType=BIT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.Device">
+    insert into t_device
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="siteId != null">
+        SITE_ID,
+      </if>
+      <if test="sn != null">
+        SN,
+      </if>
+      <if test="name != null">
+        NAME,
+      </if>
+      <if test="type != null">
+        TYPE,
+      </if>
+      <if test="band != null">
+        BAND,
+      </if>
+      <if test="operator != null">
+        OPERATOR,
+      </if>
+      <if test="manufacturer != null">
+        MANUFACTURER,
+      </if>
+      <if test="remark != null">
+        REMARK,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME,
+      </if>
+      <if test="deleteFlag != null">
+        DELETE_FLAG,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="siteId != null">
+        #{siteId,jdbcType=BIGINT},
+      </if>
+      <if test="sn != null">
+        #{sn,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=TINYINT},
+      </if>
+      <if test="band != null">
+        #{band,jdbcType=VARCHAR},
+      </if>
+      <if test="operator != null">
+        #{operator,jdbcType=VARCHAR},
+      </if>
+      <if test="manufacturer != null">
+        #{manufacturer,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null">
+        #{deleteFlag,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.DeviceExample" resultType="java.lang.Integer">
+    select count(*) from t_device
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_device
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.siteId != null">
+        SITE_ID = #{record.siteId,jdbcType=BIGINT},
+      </if>
+      <if test="record.sn != null">
+        SN = #{record.sn,jdbcType=VARCHAR},
+      </if>
+      <if test="record.name != null">
+        NAME = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.type != null">
+        TYPE = #{record.type,jdbcType=TINYINT},
+      </if>
+      <if test="record.band != null">
+        BAND = #{record.band,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operator != null">
+        OPERATOR = #{record.operator,jdbcType=VARCHAR},
+      </if>
+      <if test="record.manufacturer != null">
+        MANUFACTURER = #{record.manufacturer,jdbcType=VARCHAR},
+      </if>
+      <if test="record.remark != null">
+        REMARK = #{record.remark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.updateTime != null">
+        UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deleteFlag != null">
+        DELETE_FLAG = #{record.deleteFlag,jdbcType=BIT},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_device
+    set ID = #{record.id,jdbcType=BIGINT},
+      SITE_ID = #{record.siteId,jdbcType=BIGINT},
+      SN = #{record.sn,jdbcType=VARCHAR},
+      NAME = #{record.name,jdbcType=VARCHAR},
+      TYPE = #{record.type,jdbcType=TINYINT},
+      BAND = #{record.band,jdbcType=VARCHAR},
+      OPERATOR = #{record.operator,jdbcType=VARCHAR},
+      MANUFACTURER = #{record.manufacturer,jdbcType=VARCHAR},
+      REMARK = #{record.remark,jdbcType=VARCHAR},
+      CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      DELETE_FLAG = #{record.deleteFlag,jdbcType=BIT}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  
+    <update id="deleteDeviceById"  parameterType="com.iekun.ef.model.Device">
+    update t_device
+    set DELETE_FLAG = 1
+    where ID = #{id,jdbcType=BIGINT} 
+    </update>
+    
+    <update id="updateDeviceById"  parameterType="com.iekun.ef.model.Device">
+    update t_device
+    set 
+    NAME = #{name,jdbcType=VARCHAR},
+    BAND = #{band,jdbcType=VARCHAR},
+    OPERATOR = #{operator,jdbcType=VARCHAR},
+    MANUFACTURER = #{manufacturer,jdbcType=VARCHAR},
+    REMARK = #{remark,jdbcType=VARCHAR},
+    SITE_ID = #{siteId,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=BIGINT} 
+    </update>
+    
+    
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.Device">
+    update t_device
+    <set>
+	 <!--  <if test="band != null"> -->
+      	BAND = #{band,jdbcType=VARCHAR},
+     <!--  </if> -->
+      <if test="siteId != null">
+        SITE_ID = #{siteId,jdbcType=BIGINT},
+      </if>
+      <if test="sn != null">
+        SN = #{sn,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        TYPE = #{type,jdbcType=TINYINT},
+      </if>
+      <if test="operator != null">
+        OPERATOR = #{operator,jdbcType=VARCHAR},
+      </if>
+      <if test="manufacturer != null">
+        MANUFACTURER = #{manufacturer,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null">
+        DELETE_FLAG = #{deleteFlag,jdbcType=BIT},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.Device">
+    update t_device
+    set SITE_ID = #{siteId,jdbcType=BIGINT},
+      SN = #{sn,jdbcType=VARCHAR},
+      NAME = #{name,jdbcType=VARCHAR},
+      TYPE = #{type,jdbcType=TINYINT},
+      BAND = #{band,jdbcType=VARCHAR},
+      OPERATOR = #{operator,jdbcType=VARCHAR},
+      MANUFACTURER = #{manufacturer,jdbcType=VARCHAR},
+      REMARK = #{remark,jdbcType=VARCHAR},
+      CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      DELETE_FLAG = #{deleteFlag,jdbcType=BIT}
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  
+ <resultMap   type="com.iekun.ef.model.Device"  id="DeviceResultMap">
+    <id column="ID" jdbcType="BIGINT" property="id" />    
+    <result column="SN" jdbcType="VARCHAR" property="sn" />
+    <result column="SITE_ID" jdbcType="BIGINT" property="siteId" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="TYPE" jdbcType="TINYINT" property="type" />
+    <result column="BAND" jdbcType="VARCHAR" property="band" />
+    <result column="OPERATOR" jdbcType="VARCHAR" property="operator" />
+    <result column="MANUFACTURER" jdbcType="VARCHAR" property="manufacturer" />
+    <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime" />
+    <result column="DELETE_FLAG" jdbcType="BIT" property="deleteFlag" /> 
+    <association property="site"  javaType="com.iekun.ef.model.Site">    
+        <id property="id" column="SITE_ID" />  
+	    <result column="SITE_SN" jdbcType="VARCHAR" property="sn" />
+	    <result column="SITE_NAME" jdbcType="VARCHAR" property="name" />
+	    <result column="SITE_LONGITUDE" jdbcType="VARCHAR" property="longitude" />
+	    <result column="SITE_LATITUDE" jdbcType="VARCHAR" property="latitude" />
+	    <result column="SITE_ADDRESS" jdbcType="VARCHAR" property="address" />
+	    <result column="SITE_REMARK" jdbcType="VARCHAR" property="remark" />  
+	    <result column="SITE_CITY_NAME" jdbcType="VARCHAR" property="city_name" /> 
+	    <result column="SITE_CITY_CODE" jdbcType="VARCHAR" property="cityCode" /> 
+    </association>    
+   </resultMap>   
+   
+   <!--多表查询操作-->  
+  <select id="selectDeviceDetails" parameterType="java.util.Map"  resultMap="DeviceResultMap" >  
+      <!--分别为device的主键id与site的主键id赋值别名,避免因为两个表字段名称相同而注入到对应对象名称冲突-->  
+      select 
+          D.ID as id,
+          D.SN as SN,
+          D.NAME as NAME,
+          D.TYPE as TYPE,
+          D.BAND as BAND,
+          D.OPERATOR as OPERATOR,
+          D.MANUFACTURER as MANUFACTURER,
+          D.REMARK as REMARK,
+          D.CREATE_TIME as CREATE_TIME,
+          D.UPDATE_TIME as UPDATE_TIME,
+          D.DELETE_FLAG as DELETE_FLAG,
+          S.ID as SITE_ID,
+          S.SN as SITE_SN,
+          S.NAME as SITE_NAME,
+          S.LONGITUDE as SITE_LONGITUDE,
+          S.LATITUDE as SITE_LATITUDE,
+          S.ADDRESS as SITE_ADDRESS,
+          S.CITY_NAME as SITE_CITY_NAME,
+          S.CITY_CODE as SITE_CITY_CODE,
+          S.REMARK  as SITE_REMARK
+      from t_device D
+           left join t_site S on D.SITE_ID = S.ID
+       where D.DELETE_FLAG = 0 
+       <if test="siteid != null">  
+	     AND S.ID = #{siteid}  
+	   </if> 
+	   <if test="sitesn != null">  
+	     AND S.SN = #{sitesn}  
+	   </if>
+	   <if test="devicesn != null">  
+	     AND D.SN = #{devicesn}  
+	   </if>  
+  </select>  
+  
+ <resultMap  type="com.iekun.ef.model.DeviceUser" id="DeviceUserResultMap">
+    <result column="SITEId" jdbcType="BIGINT" property="siteId" />
+    <result column="USERId" jdbcType="VARCHAR" property="userId" />
+    <result column="DEVICESN" jdbcType="VARCHAR" property="sn" />
+    <result column="DEVICENAME" jdbcType="VARCHAR" property="sn" />
+   </resultMap>
+  
+  <select id="selectDeviceUsers"  resultMap="DeviceUserResultMap" >  
+  <!--查询得到user deviceuser表-->  
+   SELECT 
+   SU.SITE_ID as SITEId,
+   SU.USER_ID as USERId,
+   DV.SN as DEVICESN
+	FROM t_site_user SU
+		LEFT JOIN t_device DV on SU.SITE_ID = DV.SITE_ID
+   WHERE SU.delete_flag = 0 AND DV.delete_flag =0 
+  </select> 
+  
+  <select id="selectUserDevices"  parameterType="java.lang.Long" resultMap="DeviceResultMap" >  
+  <!--查询得到user的设备列表-->  
+   SELECT 
+   DV.NAME as NAME,
+   DV.SN as SN
+	FROM t_site_user SU
+		LEFT JOIN t_device DV on SU.SITE_ID = DV.SITE_ID
+   WHERE SU.delete_flag = 0 AND DV.delete_flag =0 AND SU.USER_ID = #{userId,jdbcType=BIGINT}
+  </select> 
+  
+  <resultMap  type="com.iekun.ef.model.SelfAreaCode" id="SelfAreaCodeResultMap">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="PROVINCE_CODE" jdbcType="VARCHAR" property="provinceCode" />
+    <result column="PROVINCE_NAME" jdbcType="VARCHAR" property="provinceName" />
+    <result column="CITY_CODE" jdbcType="VARCHAR" property="cityCode" />
+    <result column="CITY_NAME" jdbcType="VARCHAR" property="cityName" />
+    <result column="LEVEL" jdbcType="TINYINT" property="level" />
+   </resultMap>
+  
+  <select id="selectAreaCodeDetails"  resultMap="SelfAreaCodeResultMap" >  
+   SELECT 
+  	ID, PROVINCE_CODE, PROVINCE_NAME, CITY_CODE, CITY_NAME, LEVEL
+   FROM t_self_area_code WHERE 1=1
+  </select>     
+    
+  <!-- <resultMap id="BaseResultMap" type="com.iekun.ef.model.Device">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="SITE_ID" jdbcType="BIGINT" property="siteId" />
+    <result column="SN" jdbcType="VARCHAR" property="sn" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="TYPE" jdbcType="TINYINT" property="type" />
+    <result column="BAND" jdbcType="VARCHAR" property="band" />
+    <result column="OPERATOR" jdbcType="VARCHAR" property="operator" />
+    <result column="MANUFACTURER" jdbcType="VARCHAR" property="manufacturer" />
+    <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime" />
+    <result column="DELETE_FLAG" jdbcType="BIT" property="deleteFlag" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, SITE_ID, SN, NAME, TYPE, BAND, OPERATOR, MANUFACTURER, REMARK, CREATE_TIME, UPDATE_TIME, 
+    DELETE_FLAG
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.DeviceExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_device
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_device
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_device
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.DeviceExample">
+    delete from t_device
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.Device">
+    insert into t_device (ID, SITE_ID, SN, 
+      NAME, TYPE, BAND, OPERATOR, 
+      MANUFACTURER, REMARK, CREATE_TIME, 
+      UPDATE_TIME, DELETE_FLAG)
+    values (#{id,jdbcType=BIGINT}, #{siteId,jdbcType=BIGINT}, #{sn,jdbcType=VARCHAR}, 
+      #{name,jdbcType=VARCHAR}, #{type,jdbcType=TINYINT}, #{band,jdbcType=VARCHAR}, #{operator,jdbcType=VARCHAR}, 
+      #{manufacturer,jdbcType=VARCHAR}, #{remark,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR}, 
+      #{updateTime,jdbcType=VARCHAR}, #{deleteFlag,jdbcType=BIT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.Device">
+    insert into t_device
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="siteId != null">
+        SITE_ID,
+      </if>
+      <if test="sn != null">
+        SN,
+      </if>
+      <if test="name != null">
+        NAME,
+      </if>
+      <if test="type != null">
+        TYPE,
+      </if>
+      <if test="band != null">
+        BAND,
+      </if>
+      <if test="operator != null">
+        OPERATOR,
+      </if>
+      <if test="manufacturer != null">
+        MANUFACTURER,
+      </if>
+      <if test="remark != null">
+        REMARK,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME,
+      </if>
+      <if test="deleteFlag != null">
+        DELETE_FLAG,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="siteId != null">
+        #{siteId,jdbcType=BIGINT},
+      </if>
+      <if test="sn != null">
+        #{sn,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=TINYINT},
+      </if>
+      <if test="band != null">
+        #{band,jdbcType=VARCHAR},
+      </if>
+      <if test="operator != null">
+        #{operator,jdbcType=VARCHAR},
+      </if>
+      <if test="manufacturer != null">
+        #{manufacturer,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null">
+        #{deleteFlag,jdbcType=BIT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.DeviceExample" resultType="java.lang.Integer">
+    select count(*) from t_device
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_device
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.siteId != null">
+        SITE_ID = #{record.siteId,jdbcType=BIGINT},
+      </if>
+      <if test="record.sn != null">
+        SN = #{record.sn,jdbcType=VARCHAR},
+      </if>
+      <if test="record.name != null">
+        NAME = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.type != null">
+        TYPE = #{record.type,jdbcType=TINYINT},
+      </if>
+      <if test="record.band != null">
+        BAND = #{record.band,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operator != null">
+        OPERATOR = #{record.operator,jdbcType=VARCHAR},
+      </if>
+      <if test="record.manufacturer != null">
+        MANUFACTURER = #{record.manufacturer,jdbcType=VARCHAR},
+      </if>
+      <if test="record.remark != null">
+        REMARK = #{record.remark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.updateTime != null">
+        UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deleteFlag != null">
+        DELETE_FLAG = #{record.deleteFlag,jdbcType=BIT},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_device
+    set ID = #{record.id,jdbcType=BIGINT},
+      SITE_ID = #{record.siteId,jdbcType=BIGINT},
+      SN = #{record.sn,jdbcType=VARCHAR},
+      NAME = #{record.name,jdbcType=VARCHAR},
+      TYPE = #{record.type,jdbcType=TINYINT},
+      BAND = #{record.band,jdbcType=VARCHAR},
+      OPERATOR = #{record.operator,jdbcType=VARCHAR},
+      MANUFACTURER = #{record.manufacturer,jdbcType=VARCHAR},
+      REMARK = #{record.remark,jdbcType=VARCHAR},
+      CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      DELETE_FLAG = #{record.deleteFlag,jdbcType=BIT}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.Device">
+    update t_device
+    <set>
+      <if test="siteId != null">
+        SITE_ID = #{siteId,jdbcType=BIGINT},
+      </if>
+      <if test="sn != null">
+        SN = #{sn,jdbcType=VARCHAR},
+      </if>
+      <if test="name != null">
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="type != null">
+        TYPE = #{type,jdbcType=TINYINT},
+      </if>
+      <if test="band != null">
+        BAND = #{band,jdbcType=VARCHAR},
+      </if>
+      <if test="operator != null">
+        OPERATOR = #{operator,jdbcType=VARCHAR},
+      </if>
+      <if test="manufacturer != null">
+        MANUFACTURER = #{manufacturer,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null">
+        DELETE_FLAG = #{deleteFlag,jdbcType=BIT},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.Device">
+    update t_device
+    set SITE_ID = #{siteId,jdbcType=BIGINT},
+      SN = #{sn,jdbcType=VARCHAR},
+      NAME = #{name,jdbcType=VARCHAR},
+      TYPE = #{type,jdbcType=TINYINT},
+      BAND = #{band,jdbcType=VARCHAR},
+      OPERATOR = #{operator,jdbcType=VARCHAR},
+      MANUFACTURER = #{manufacturer,jdbcType=VARCHAR},
+      REMARK = #{remark,jdbcType=VARCHAR},
+      CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      DELETE_FLAG = #{deleteFlag,jdbcType=BIT}
+    where ID = #{id,jdbcType=BIGINT}
+  </update> -->
+</mapper>

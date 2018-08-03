@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.DeviceUpNumExMapper">
+    <resultMap id="baseResultMap" type="com.iekun.ef.model.DeviceUpNumExModel">
+        <id column="ID" jdbcType="BIGINT" property="id" />
+        <result column="DEVICE_ID" jdbcType="VARCHAR" property="deviceId" />
+        <result column="START_TIME" jdbcType="TIMESTAMP" property="startTime" />
+        <result column="END_TIME" jdbcType="TIMESTAMP" property="endTime" />
+        <result column="TIME_INTERVAL" jdbcType="BIGINT" property="interval" />
+        <result column="IS_VALID" jdbcType="TINYINT" property="isValid" />
+        <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    </resultMap>
+
+    <select id="getHistoryConfigs" parameterType="java.lang.String" resultMap="baseResultMap">
+        select ID, DEVICE_ID, START_TIME, END_TIME, TIME_INTERVAL, IS_VALID, REMARK
+        from t_device_alarm_config
+        where DEVICE_ID = #{deviceSn}
+    </select>
+
+    <!-- 批量插入 -->
+    <insert id="insertConfigs" parameterType="java.util.List">
+        insert into t_device_alarm_config(DEVICE_ID, START_TIME, END_TIME, TIME_INTERVAL, IS_VALID, REMARK)
+        values
+        <foreach collection="list" item="item" index="index" separator=",">
+            (#{item.deviceId,jdbcType=VARCHAR}, #{item.startTime,jdbcType=TIMESTAMP}, #{item.endTime,jdbcType=TIMESTAMP}, #{item.interval,jdbcType=BIGINT},
+            #{item.isValid,jdbcType=TINYINT}, #{item.remark,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+
+    <!-- 批量删除 -->
+    <delete id="deleteConfigs" parameterType="java.util.List">
+        delete from t_device_alarm_config
+        where
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator="OR">
+            ID = #{item.id}
+        </foreach>
+    </delete>
+    
+    <update id="updateConfigs" parameterType="java.util.List">
+        update t_device_alarm_config
+        set
+        DEVICE_ID = #{item.deviceId},
+        START_TIME = #{item.startTime},
+        END_TIME = #{item.endTime},
+        TIME_INTERVAL = #{item.interval},
+        IS_VALID = #{item.isValid},
+        REMARK = #{item.remark}
+        where id in
+        <foreach collection="list" item="item" index="index" open="(" close=")" separator=",">
+          ${item.id}
+        </foreach>
+    </update>
+
+    <delete id="deleteConfig" parameterType="com.iekun.ef.model.DeviceUpNumExModel">
+        delete from t_device_alarm_config
+        where id = #{id,jdbcType=BIGINT}
+    </delete>
+    
+    <update id="updateConfig" parameterType="com.iekun.ef.model.DeviceUpNumExModel">
+        update t_device_alarm_config
+        set ID = #{id,jdbcType=BIGINT},
+          DEVICE_ID = #{deviceId,jdbcType=VARCHAR},
+          START_TIME = #{startTime,jdbcType=TIMESTAMP},
+          END_TIME = #{endTime,jdbcType=TIMESTAMP},
+          TIME_INTERVAL = #{interval,jdbcType=BIGINT},
+          IS_VALID = #{is_valid,jdbcType=TINYINT},
+          REMARK = #{remark,jdbcType=VARCHAR}
+        where id = #{id,jdbcType=BIGINT}
+    </update>
+
+</mapper>

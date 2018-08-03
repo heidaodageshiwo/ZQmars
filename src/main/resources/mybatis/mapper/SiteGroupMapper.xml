@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.SiteGroupMapper">
+
+
+    <resultMap  type="com.iekun.ef.model.SiteUser" id="BaseResultMap">
+        <id column="ID" jdbcType="BIGINT" property="id" />
+        <result column="SITE_ID" jdbcType="BIGINT" property="siteId" />
+        <result column="USER_ID" jdbcType="BIGINT" property="userId" />
+        <result column="DELETE_FLAG" jdbcType="BIT" property="deleteFlag" />
+    </resultMap>
+
+
+    <!--通过用户ID查询对应的站点-->
+    <select id="querySiteByUserId" parameterType="java.lang.Long" resultType="com.iekun.ef.model.Site">
+          SELECT
+            a.ID,a.NAME,a.PROVINCE_ID,a.PROVINCE_NAME,a.CITY_ID,a.CITY_NAME,a.TOWN_ID,a.TOWN_NAME
+        FROM
+            t_site a
+        WHERE
+
+            a.DELETE_FLAG='0'
+    </select>
+
+    <!-- //通过userid查询出这个用户下的设备-->
+    <select id="querysiteUserList" parameterType="java.lang.Long" resultMap="BaseResultMap">
+
+            SELECT 	ID,
+                SITE_ID,
+                USER_ID,
+                DELETE_FLAG
+
+                FROM
+                t_site_user
+            WHERE 	USER_ID=#{userId} AND DELETE_FLAG='0'
+                AND SITE_ID IN(
+
+                SELECT 	ID
+            FROM t_site WHERE DELETE_FLAG='0'
+
+                )
+    </select>
+
+
+   <!-- <delete id="deleteData"  parameterType="java.lang.String" >
+        delete from t_site_user where site_id=#{siteid} and user_id=#{userid}
+    </delete>-->
+    <delete id="deleteData"  parameterType="java.util.Map" >
+        delete from t_site_user where  user_id=#{userid}
+        and site_id   in
+        <foreach item="list" collection="list" open="(" close=")" separator=",">
+            #{list}
+        </foreach>
+    </delete>
+
+    <!--<insert id="insertData" parameterType="java.lang.String" >
+      INSERT INTO t_site_user(ID,SITE_ID,USER_ID,DELETE_FLAG)
+	  VALUES (null,#{siteid},#{userid},0)
+    </insert>-->
+    <insert id="insertData" parameterType="java.util.List" >
+        INSERT INTO t_site_user(ID,SITE_ID,USER_ID,DELETE_FLAG)
+        VALUES
+        <foreach collection="list" item="sitelist" index="index" separator="," >
+        (null,#{sitelist.siteId},#{sitelist.userId},0)
+        </foreach>
+    </insert>
+</mapper>

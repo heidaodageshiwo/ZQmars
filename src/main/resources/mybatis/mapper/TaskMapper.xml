@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.TaskMapper">
+    <resultMap  type="com.iekun.ef.model.Task" id="BaseResultMap">
+        <id column="ID" jdbcType="BIGINT" property="id" />
+        <result column="TYPE" jdbcType="TINYINT" property="type" />
+        <result column="NAME" jdbcType="VARCHAR" property="name" />
+        <result column="RESULT_EXT" jdbcType="VARCHAR" property="resultExt" />
+        <result column="EXPORT_PATH" jdbcType="VARCHAR" property="exportPath" />
+        <result column="IS_FINISH" jdbcType="TINYINT" property="isFinish" />
+        <result column="TRY_COUNT" jdbcType="INTEGER" property="tryCount" />
+        <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+        <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+        <result column="FINISH_TIME" jdbcType="VARCHAR" property="finishTime" />
+        <result column="CREATOR_ID" jdbcType="BIGINT" property="creatorId" />
+        <result column="DELETE_FLAG" jdbcType="TINYINT" property="deleteFlag" />
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.iekun.ef.model.Task">
+        <result column="PARAMETER" jdbcType="LONGVARCHAR" property="parameter" />
+        <result column="RESULT" jdbcType="LONGVARCHAR" property="result" />
+    </resultMap>
+
+    <sql id="Base_Column_List">
+        ID, TYPE, NAME, RESULT_EXT, IS_FINISH, TRY_COUNT, REMARK, CREATE_TIME, FINISH_TIME, CREATOR_ID, DELETE_FLAG
+    </sql>
+    <sql id="Blob_Column_List">
+        PARAMETER, RESULT
+    </sql>
+
+    <select id="getTaskCount" parameterType="java.util.Map" resultType="java.lang.Long" >
+        select
+        count(1)
+        from t_task
+        where 1=1
+        AND DELETE_FLAG = 0
+        <if test="type != null">
+            AND TYPE = #{type}
+        </if>
+        <if test="isFinish != null">
+            AND IS_FINISH = #{isFinish}
+        </if>
+        <if test="creatorId != null">
+            AND CREATOR_ID = #{creatorId}
+        </if>
+    </select>
+
+    <select id="getTasksByIsFinish" parameterType="java.lang.Integer" resultMap="ResultMapWithBLOBs" >
+        select
+        <include refid="Base_Column_List" />
+        ,
+        <include refid="Blob_Column_List" />
+        from t_task
+        where IS_FINISH = #{isFinish,jdbcType=TINYINT}
+               AND DELETE_FLAG = 0
+    </select>
+
+    <select id="getTaskById" parameterType="java.lang.Long" resultMap="ResultMapWithBLOBs" >
+        select
+        <include refid="Base_Column_List" />
+        ,
+        <include refid="Blob_Column_List" />
+        from t_task
+        where ID = #{id,jdbcType=BIGINT}
+        AND DELETE_FLAG = 0
+    </select>
+
+    <select id="getTasks" parameterType="java.util.Map" resultMap="ResultMapWithBLOBs" >
+        select
+        <include refid="Base_Column_List" />
+        ,
+        <include refid="Blob_Column_List" />
+        from t_task
+        where DELETE_FLAG = 0
+        <if test="id != null">
+            AND ID = #{id}
+        </if>
+        <if test="type != null">
+            AND TYPE = #{type}
+        </if>
+        <if test="name != null">
+            AND NAME = #{name}
+        </if>
+        <if test="isFinish != null">
+            AND IS_FINISH = #{isFinish}
+        </if>
+        <if test="creatorId != null">
+            AND CREATOR_ID = #{creatorId}
+        </if>
+        <if test="orderByTryCount != null">
+            ORDER BY TRY_COUNT ASC
+        </if>
+    </select>
+
+    <update id="updateTaskById" parameterType="com.iekun.ef.model.Task" >
+      update t_task
+      set TYPE = #{type ,jdbcType=TINYINT},
+          NAME = #{name,jdbcType=VARCHAR},
+          PARAMETER = #{parameter,jdbcType=LONGVARCHAR},
+          RESULT = #{result,jdbcType=LONGVARCHAR},
+          RESULT_EXT = #{resultExt,jdbcType=VARCHAR},
+          EXPORT_PATH = #{exportPath,jdbcType=VARCHAR},
+          IS_FINISH = #{isFinish,jdbcType=TINYINT},
+          REMARK = #{remark,jdbcType=VARCHAR},
+          CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+          FINISH_TIME = #{finishTime,jdbcType=VARCHAR},
+          CREATOR_ID = #{creatorId,jdbcType=BIGINT},
+          DELETE_FLAG = #{deleteFlag,jdbcType=BIT}
+      where ID = #{id,jdbcType=BIGINT}
+    </update>
+
+    <delete id="deleteByID" parameterType="java.lang.Long">
+        update t_task set DELETE_FLAG = 1
+        where ID = #{id,jdbcType=BIGINT}
+    </delete>
+
+    <insert id="insertTask" parameterType="com.iekun.ef.model.Task">
+      insert into t_task ( TYPE, NAME , PARAMETER, CREATE_TIME, CREATOR_ID )
+      values ( #{type ,jdbcType=TINYINT}, #{name,jdbcType=VARCHAR},
+         #{parameter,jdbcType=LONGVARCHAR}, #{createTime,jdbcType=VARCHAR},
+          #{creatorId,jdbcType=BIGINT} )
+    </insert>
+
+    <update id="updateTryCount" >
+        update t_task
+        set TRY_COUNT = #{tryCount ,jdbcType=INTEGER }
+        where ID = #{id,jdbcType=BIGINT}
+    </update>
+
+</mapper>

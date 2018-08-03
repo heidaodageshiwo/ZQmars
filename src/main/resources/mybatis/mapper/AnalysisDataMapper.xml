@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.AnalysisiDataMapper">
+  <resultMap  type="com.iekun.ef.model.AnalysisData" id="BaseResultMap">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+      <result column="SITE_NAME" jdbcType="VARCHAR" property="sitename" />
+      <result column="DEVICE_SN" jdbcType="VARCHAR" property="devicesn" />
+      <result column="SITE_SN" jdbcType="BIGINT" property="sitesn" />
+      <result column="OPERATOR" jdbcType="VARCHAR" property="operator" />
+      <result column="CITY_NAME" jdbcType="VARCHAR" property="cityname" />
+      <result column="IMSI" jdbcType="VARCHAR" property="imsi" />
+      <result column="DATACOUNT" jdbcType="VARCHAR" property="datacount" />
+      <result column="DAYCOUNT" jdbcType="VARCHAR" property="daycount" />
+      <result column="CAPTURE_TIME" jdbcType="VARCHAR" property="capturetime" />
+  </resultMap>
+    <select id="getTueinfoData" parameterType="java.lang.String" resultMap="BaseResultMap">
+               SELECT shzsb.id,shzsb.site_name,shzsb.device_sn,shzsb.site_sn,shzsb.operator,shzsb.city_name,shzsb.imsi,shzsb.shzs AS datacount,   cxtsb.cxts AS daycount FROM
+              (SELECT id,site_name,device_sn,site_sn,operator,city_name,imsi,COUNT(imsi) AS shzs  FROM t_ue_info WHERE ${condition2}  GROUP BY imsi ORDER BY shzs DESC )shzsb ,
+              ( SELECT a.id,a.site_name,a.device_sn,a.site_sn,a.operator,a.city_name,a.imsi, COUNT(*) AS cxts FROM (
+               SELECT id,site_name,device_sn,site_sn,operator,city_name,imsi, DATE_FORMAT(CAPTURE_TIME,'%Y%m%d') AS c FROM t_ue_info WHERE ${condition2}     GROUP BY c,imsi
+               )a GROUP BY a.imsi)cxtsb
+               WHERE shzsb.imsi=cxtsb.imsi  ${condition}
+    </select>
+    <select id="getTueinfoDataBydevicesn"  parameterType="java.lang.String" resultMap="BaseResultMap">
+               SELECT id,site_name,device_sn,site_sn,operator,city_name,imsi,CAPTURE_TIME,COUNT(site_sn) sn  FROM t_ue_info WHERE imsi=#{id} and ${condition3} GROUP BY site_sn ORDER BY  sn DESC
+    </select>
+    <select id="queryAnalysisiDataAjaxByImsi"  parameterType="java.lang.String" resultMap="BaseResultMap">
+               SELECT id,site_name,device_sn,site_sn,operator,city_name,imsi,CAPTURE_TIME FROM t_ue_info WHERE imsi=#{id} and ${condition2}
+    </select>
+    <select id="queryAnalysisiDataAjaxByAll"  parameterType="java.lang.String" resultMap="BaseResultMap">
+              SELECT sj.capture_time,sj.id,sj.site_name,sj.device_sn,sj.site_sn,sj.operator,sj.city_name,sj.imsi,sj.datacount,sj.daycount FROM (
+              SELECT shzsb.capture_time, shzsb.id,shzsb.site_name,shzsb.device_sn,shzsb.site_sn,shzsb.operator,shzsb.city_name,shzsb.imsi,shzsb.shzs AS datacount,   cxtsb.cxts AS daycount
+              FROM
+              (SELECT capture_time, id,site_name,device_sn,site_sn,operator,city_name,imsi,COUNT(imsi) AS shzs  FROM t_ue_info WHERE ${condition2} GROUP BY imsi ORDER BY shzs DESC )shzsb ,
+              ( SELECT  a.capture_time,a.id,a.site_name,a.device_sn,a.site_sn,a.operator,a.city_name,a.imsi, COUNT(*) AS cxts FROM (
+              SELECT capture_time, id,site_name,device_sn,site_sn,operator,city_name,imsi, DATE_FORMAT(CAPTURE_TIME,'%Y%m%d') AS c FROM t_ue_info  WHERE ${condition2}      GROUP BY c,imsi
+              )a GROUP BY a.imsi)cxtsb
+              WHERE shzsb.imsi=cxtsb.imsi
+              ) sj
+               WHERE ${condition}
+    </select>
+  <select id="getBMD"  resultMap="BaseResultMap">
+              select imsi from t_whitelist group by imsi
+  </select>
+</mapper>

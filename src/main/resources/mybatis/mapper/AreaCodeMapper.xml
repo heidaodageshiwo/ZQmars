@@ -1,0 +1,671 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.AreaCodeMapper">
+ <resultMap  type="com.iekun.ef.model.AreaCode" id="BaseResultMap">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="PARENTID" jdbcType="BIGINT" property="parentid" />
+    <result column="SHORT_NAME" jdbcType="VARCHAR" property="shortName" />
+    <result column="LEVEL" jdbcType="TINYINT" property="level" />
+    <result column="CITY_CODE" jdbcType="VARCHAR" property="cityCode" />
+    <result column="ZIP_CODE" jdbcType="VARCHAR" property="zipCode" />
+    <result column="MERGER_NAME" jdbcType="VARCHAR" property="mergerName" />
+    <result column="LNG" jdbcType="VARCHAR" property="lng" />
+    <result column="LAT" jdbcType="VARCHAR" property="lat" />
+    <result column="PINYIN" jdbcType="VARCHAR" property="pinyin" />
+  </resultMap> 
+   <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, NAME, PARENTID, SHORT_NAME, LEVEL, CITY_CODE, ZIP_CODE, MERGER_NAME, LNG, LAT, 
+    PINYIN
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.AreaCodeExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_area_code
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select> 
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_area_code
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <select id="selectProvinceList"  resultMap="BaseResultMap">
+    select 
+    ID, SHORT_NAME
+    from t_area_code
+    where level = 1
+   </select>
+  
+  <select id="selectCityList" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    ID, SHORT_NAME
+    from t_area_code
+    where LEVEL = 2 and
+    PARENTID = #{provinceId,jdbcType=BIGINT}
+  </select>
+  
+  <select id="selectTownList" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    ID, SHORT_NAME
+    from t_area_code
+    where level = 3 and
+    PARENTID = #{cityId,jdbcType=BIGINT}  
+  </select>
+  
+  <resultMap  type="com.iekun.ef.model.SelfAreaCode" id="SelfAreaCodeResultMap">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="PROVINCE_NAME" jdbcType="VARCHAR" property="provinceName" />
+    <result column="PROVINCE_CODE" jdbcType="VARCHAR" property="provinceCode" />
+    <result column="CITY_NAME" jdbcType="VARCHAR" property="cityName" />
+    <result column="CITY_CODE" jdbcType="VARCHAR" property="cityCode" />
+  </resultMap> 
+  <select id="selectCityCodeList" parameterType="java.lang.Integer" resultMap="SelfAreaCodeResultMap">
+    select 
+    ID, PROVINCE_NAME, PROVINCE_CODE, CITY_NAME, CITY_CODE
+    from t_self_area_code
+    where level = #{zoneLevel,jdbcType=TINYINT}  
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_area_code
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.AreaCodeExample">
+    delete from t_area_code
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.AreaCode">
+    insert into t_area_code (ID, NAME, PARENTID, 
+      SHORT_NAME, LEVEL, CITY_CODE, 
+      ZIP_CODE, MERGER_NAME, LNG, 
+      LAT, PINYIN)
+    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{parentid,jdbcType=BIGINT}, 
+      #{shortName,jdbcType=VARCHAR}, #{level,jdbcType=TINYINT}, #{cityCode,jdbcType=VARCHAR}, 
+      #{zipCode,jdbcType=VARCHAR}, #{mergerName,jdbcType=VARCHAR}, #{lng,jdbcType=VARCHAR}, 
+      #{lat,jdbcType=VARCHAR}, #{pinyin,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.AreaCode">
+    insert into t_area_code
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="name != null">
+        NAME,
+      </if>
+      <if test="parentid != null">
+        PARENTID,
+      </if>
+      <if test="shortName != null">
+        SHORT_NAME,
+      </if>
+      <if test="level != null">
+        LEVEL,
+      </if>
+      <if test="cityCode != null">
+        CITY_CODE,
+      </if>
+      <if test="zipCode != null">
+        ZIP_CODE,
+      </if>
+      <if test="mergerName != null">
+        MERGER_NAME,
+      </if>
+      <if test="lng != null">
+        LNG,
+      </if>
+      <if test="lat != null">
+        LAT,
+      </if>
+      <if test="pinyin != null">
+        PINYIN,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="parentid != null">
+        #{parentid,jdbcType=BIGINT},
+      </if>
+      <if test="shortName != null">
+        #{shortName,jdbcType=VARCHAR},
+      </if>
+      <if test="level != null">
+        #{level,jdbcType=TINYINT},
+      </if>
+      <if test="cityCode != null">
+        #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="zipCode != null">
+        #{zipCode,jdbcType=VARCHAR},
+      </if>
+      <if test="mergerName != null">
+        #{mergerName,jdbcType=VARCHAR},
+      </if>
+      <if test="lng != null">
+        #{lng,jdbcType=VARCHAR},
+      </if>
+      <if test="lat != null">
+        #{lat,jdbcType=VARCHAR},
+      </if>
+      <if test="pinyin != null">
+        #{pinyin,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.AreaCodeExample" resultType="java.lang.Integer">
+    select count(*) from t_area_code
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_area_code
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.name != null">
+        NAME = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.parentid != null">
+        PARENTID = #{record.parentid,jdbcType=BIGINT},
+      </if>
+      <if test="record.shortName != null">
+        SHORT_NAME = #{record.shortName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.level != null">
+        LEVEL = #{record.level,jdbcType=TINYINT},
+      </if>
+      <if test="record.cityCode != null">
+        CITY_CODE = #{record.cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.zipCode != null">
+        ZIP_CODE = #{record.zipCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.mergerName != null">
+        MERGER_NAME = #{record.mergerName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.lng != null">
+        LNG = #{record.lng,jdbcType=VARCHAR},
+      </if>
+      <if test="record.lat != null">
+        LAT = #{record.lat,jdbcType=VARCHAR},
+      </if>
+      <if test="record.pinyin != null">
+        PINYIN = #{record.pinyin,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_area_code
+    set ID = #{record.id,jdbcType=BIGINT},
+      NAME = #{record.name,jdbcType=VARCHAR},
+      PARENTID = #{record.parentid,jdbcType=BIGINT},
+      SHORT_NAME = #{record.shortName,jdbcType=VARCHAR},
+      LEVEL = #{record.level,jdbcType=TINYINT},
+      CITY_CODE = #{record.cityCode,jdbcType=VARCHAR},
+      ZIP_CODE = #{record.zipCode,jdbcType=VARCHAR},
+      MERGER_NAME = #{record.mergerName,jdbcType=VARCHAR},
+      LNG = #{record.lng,jdbcType=VARCHAR},
+      LAT = #{record.lat,jdbcType=VARCHAR},
+      PINYIN = #{record.pinyin,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.AreaCode">
+    update t_area_code
+    <set>
+      <if test="name != null">
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="parentid != null">
+        PARENTID = #{parentid,jdbcType=BIGINT},
+      </if>
+      <if test="shortName != null">
+        SHORT_NAME = #{shortName,jdbcType=VARCHAR},
+      </if>
+      <if test="level != null">
+        LEVEL = #{level,jdbcType=TINYINT},
+      </if>
+      <if test="cityCode != null">
+        CITY_CODE = #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="zipCode != null">
+        ZIP_CODE = #{zipCode,jdbcType=VARCHAR},
+      </if>
+      <if test="mergerName != null">
+        MERGER_NAME = #{mergerName,jdbcType=VARCHAR},
+      </if>
+      <if test="lng != null">
+        LNG = #{lng,jdbcType=VARCHAR},
+      </if>
+      <if test="lat != null">
+        LAT = #{lat,jdbcType=VARCHAR},
+      </if>
+      <if test="pinyin != null">
+        PINYIN = #{pinyin,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.AreaCode">
+    update t_area_code
+    set NAME = #{name,jdbcType=VARCHAR},
+      PARENTID = #{parentid,jdbcType=BIGINT},
+      SHORT_NAME = #{shortName,jdbcType=VARCHAR},
+      LEVEL = #{level,jdbcType=TINYINT},
+      CITY_CODE = #{cityCode,jdbcType=VARCHAR},
+      ZIP_CODE = #{zipCode,jdbcType=VARCHAR},
+      MERGER_NAME = #{mergerName,jdbcType=VARCHAR},
+      LNG = #{lng,jdbcType=VARCHAR},
+      LAT = #{lat,jdbcType=VARCHAR},
+      PINYIN = #{pinyin,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+
+  <select id="selectAreaCodeList"  resultMap="BaseResultMap">
+    SELECT
+       <include refid="Base_Column_List" />
+    FROM t_area_code
+    WHERE
+        level != 0 
+  </select>
+
+   <!--<resultMap id="BaseResultMap" type="com.iekun.ef.model.AreaCode">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="NAME" jdbcType="VARCHAR" property="name" />
+    <result column="PARENTID" jdbcType="BIGINT" property="parentid" />
+    <result column="SHORT_NAME" jdbcType="VARCHAR" property="shortName" />
+    <result column="LEVEL" jdbcType="TINYINT" property="level" />
+    <result column="CITY_CODE" jdbcType="VARCHAR" property="cityCode" />
+    <result column="ZIP_CODE" jdbcType="VARCHAR" property="zipCode" />
+    <result column="MERGER_NAME" jdbcType="VARCHAR" property="mergerName" />
+    <result column="LNG" jdbcType="VARCHAR" property="lng" />
+    <result column="LAT" jdbcType="VARCHAR" property="lat" />
+    <result column="PINYIN" jdbcType="VARCHAR" property="pinyin" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, NAME, PARENTID, SHORT_NAME, LEVEL, CITY_CODE, ZIP_CODE, MERGER_NAME, LNG, LAT, 
+    PINYIN
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.AreaCodeExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_area_code
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_area_code
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_area_code
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.AreaCodeExample">
+    delete from t_area_code
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.AreaCode">
+    insert into t_area_code (ID, NAME, PARENTID, 
+      SHORT_NAME, LEVEL, CITY_CODE, 
+      ZIP_CODE, MERGER_NAME, LNG, 
+      LAT, PINYIN)
+    values (#{id,jdbcType=BIGINT}, #{name,jdbcType=VARCHAR}, #{parentid,jdbcType=BIGINT}, 
+      #{shortName,jdbcType=VARCHAR}, #{level,jdbcType=TINYINT}, #{cityCode,jdbcType=VARCHAR}, 
+      #{zipCode,jdbcType=VARCHAR}, #{mergerName,jdbcType=VARCHAR}, #{lng,jdbcType=VARCHAR}, 
+      #{lat,jdbcType=VARCHAR}, #{pinyin,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.AreaCode">
+    insert into t_area_code
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="name != null">
+        NAME,
+      </if>
+      <if test="parentid != null">
+        PARENTID,
+      </if>
+      <if test="shortName != null">
+        SHORT_NAME,
+      </if>
+      <if test="level != null">
+        LEVEL,
+      </if>
+      <if test="cityCode != null">
+        CITY_CODE,
+      </if>
+      <if test="zipCode != null">
+        ZIP_CODE,
+      </if>
+      <if test="mergerName != null">
+        MERGER_NAME,
+      </if>
+      <if test="lng != null">
+        LNG,
+      </if>
+      <if test="lat != null">
+        LAT,
+      </if>
+      <if test="pinyin != null">
+        PINYIN,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="name != null">
+        #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="parentid != null">
+        #{parentid,jdbcType=BIGINT},
+      </if>
+      <if test="shortName != null">
+        #{shortName,jdbcType=VARCHAR},
+      </if>
+      <if test="level != null">
+        #{level,jdbcType=TINYINT},
+      </if>
+      <if test="cityCode != null">
+        #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="zipCode != null">
+        #{zipCode,jdbcType=VARCHAR},
+      </if>
+      <if test="mergerName != null">
+        #{mergerName,jdbcType=VARCHAR},
+      </if>
+      <if test="lng != null">
+        #{lng,jdbcType=VARCHAR},
+      </if>
+      <if test="lat != null">
+        #{lat,jdbcType=VARCHAR},
+      </if>
+      <if test="pinyin != null">
+        #{pinyin,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.AreaCodeExample" resultType="java.lang.Integer">
+    select count(*) from t_area_code
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_area_code
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.name != null">
+        NAME = #{record.name,jdbcType=VARCHAR},
+      </if>
+      <if test="record.parentid != null">
+        PARENTID = #{record.parentid,jdbcType=BIGINT},
+      </if>
+      <if test="record.shortName != null">
+        SHORT_NAME = #{record.shortName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.level != null">
+        LEVEL = #{record.level,jdbcType=TINYINT},
+      </if>
+      <if test="record.cityCode != null">
+        CITY_CODE = #{record.cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.zipCode != null">
+        ZIP_CODE = #{record.zipCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.mergerName != null">
+        MERGER_NAME = #{record.mergerName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.lng != null">
+        LNG = #{record.lng,jdbcType=VARCHAR},
+      </if>
+      <if test="record.lat != null">
+        LAT = #{record.lat,jdbcType=VARCHAR},
+      </if>
+      <if test="record.pinyin != null">
+        PINYIN = #{record.pinyin,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_area_code
+    set ID = #{record.id,jdbcType=BIGINT},
+      NAME = #{record.name,jdbcType=VARCHAR},
+      PARENTID = #{record.parentid,jdbcType=BIGINT},
+      SHORT_NAME = #{record.shortName,jdbcType=VARCHAR},
+      LEVEL = #{record.level,jdbcType=TINYINT},
+      CITY_CODE = #{record.cityCode,jdbcType=VARCHAR},
+      ZIP_CODE = #{record.zipCode,jdbcType=VARCHAR},
+      MERGER_NAME = #{record.mergerName,jdbcType=VARCHAR},
+      LNG = #{record.lng,jdbcType=VARCHAR},
+      LAT = #{record.lat,jdbcType=VARCHAR},
+      PINYIN = #{record.pinyin,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.AreaCode">
+    update t_area_code
+    <set>
+      <if test="name != null">
+        NAME = #{name,jdbcType=VARCHAR},
+      </if>
+      <if test="parentid != null">
+        PARENTID = #{parentid,jdbcType=BIGINT},
+      </if>
+      <if test="shortName != null">
+        SHORT_NAME = #{shortName,jdbcType=VARCHAR},
+      </if>
+      <if test="level != null">
+        LEVEL = #{level,jdbcType=TINYINT},
+      </if>
+      <if test="cityCode != null">
+        CITY_CODE = #{cityCode,jdbcType=VARCHAR},
+      </if>
+      <if test="zipCode != null">
+        ZIP_CODE = #{zipCode,jdbcType=VARCHAR},
+      </if>
+      <if test="mergerName != null">
+        MERGER_NAME = #{mergerName,jdbcType=VARCHAR},
+      </if>
+      <if test="lng != null">
+        LNG = #{lng,jdbcType=VARCHAR},
+      </if>
+      <if test="lat != null">
+        LAT = #{lat,jdbcType=VARCHAR},
+      </if>
+      <if test="pinyin != null">
+        PINYIN = #{pinyin,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.AreaCode">
+    update t_area_code
+    set NAME = #{name,jdbcType=VARCHAR},
+      PARENTID = #{parentid,jdbcType=BIGINT},
+      SHORT_NAME = #{shortName,jdbcType=VARCHAR},
+      LEVEL = #{level,jdbcType=TINYINT},
+      CITY_CODE = #{cityCode,jdbcType=VARCHAR},
+      ZIP_CODE = #{zipCode,jdbcType=VARCHAR},
+      MERGER_NAME = #{mergerName,jdbcType=VARCHAR},
+      LNG = #{lng,jdbcType=VARCHAR},
+      LAT = #{lat,jdbcType=VARCHAR},
+      PINYIN = #{pinyin,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=BIGINT}
+  </update> -->
+</mapper>

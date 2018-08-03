@@ -1,0 +1,779 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.VersionLibMapper">
+  <resultMap  type="com.iekun.ef.model.VersionLib" id="BaseResultMap">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="VERSION_TYPE" jdbcType="TINYINT" property="versionType" />
+    <result column="VERSION" jdbcType="VARCHAR" property="version" />
+    <result column="FPGA_VERSION" jdbcType="VARCHAR" property="fpgaVersion" />
+    <result column="BBU_VERSION" jdbcType="VARCHAR" property="bbuVersion" />
+    <result column="SW_VERSION" jdbcType="VARCHAR" property="swVersion" />
+    <result column="UPLOAD_USER" jdbcType="VARCHAR" property="uploadUser" />
+    <result column="UPLOAD_TIME" jdbcType="VARCHAR" property="uploadTime" />
+    <result column="FILE_URL" jdbcType="VARCHAR" property="fileUrl" />
+    <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="DELETE_FLAG" jdbcType="BIT" property="deleteFlag" />
+    <result column="CHECK_SUM" jdbcType="VARCHAR" property="checksum" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, VERSION_TYPE, VERSION, FPGA_VERSION, BBU_VERSION, SW_VERSION, UPLOAD_USER, UPLOAD_TIME, 
+    FILE_URL, REMARK, CREATE_TIME, DELETE_FLAG, CHECK_SUM
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.VersionLibExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_version_lib
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    *
+    from t_version_lib
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  
+   <select id="getVersionLibList"  resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_version_lib
+    where DELETE_FLAG = 0
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_version_lib
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.VersionLibExample">
+    delete from t_version_lib
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.VersionLib">
+    insert into t_version_lib (ID, VERSION_TYPE, VERSION, 
+      FPGA_VERSION, BBU_VERSION, SW_VERSION, 
+      UPLOAD_USER, UPLOAD_TIME, FILE_URL, 
+      REMARK, CREATE_TIME, DELETE_FLAG, 
+      CHECK_SUM)
+    values (#{id,jdbcType=BIGINT}, #{versionType,jdbcType=TINYINT}, #{version,jdbcType=VARCHAR}, 
+      #{fpgaVersion,jdbcType=VARCHAR}, #{bbuVersion,jdbcType=VARCHAR}, #{swVersion,jdbcType=VARCHAR}, 
+      #{uploadUser,jdbcType=VARCHAR}, #{uploadTime,jdbcType=VARCHAR}, #{fileUrl,jdbcType=VARCHAR}, 
+      #{remark,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR}, #{deleteFlag,jdbcType=BIT}, 
+      #{checksum,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertVersionLib" parameterType="java.util.Map">
+    insert into t_version_lib
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+     <if test="version != null">
+        VERSION,
+      </if>
+      <if test="fpgaVersion != null">
+        FPGA_VERSION,
+      </if>
+      <if test="bbuVersion != null">
+        BBU_VERSION,
+      </if>
+      <if test="swVersion != null">
+        SW_VERSION,
+      </if>
+      <if test="uploadUser != null">
+        UPLOAD_USER,
+      </if>
+      <if test="uploadTime != null">
+        UPLOAD_TIME,
+      </if>
+      <if test="fileUrl != null">
+        FILE_URL,
+      </if>
+      <if test="remark != null">
+        REMARK,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="deleteFlag != null">
+        DELETE_FLAG,
+      </if>
+      <if test="checksum != null">
+        CHECK_SUM,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+     <if test="version != null">
+        #{version},
+      </if>
+      <if test="fpgaVersion != null">
+        #{fpgaVersion},
+      </if>
+      <if test="bbuVersion != null">
+        #{bbuVersion},
+      </if>
+      <if test="swVersion != null">
+        #{swVersion},
+      </if>
+      <if test="uploadUser != null">
+        #{uploadUser},
+      </if>
+      <if test="uploadTime != null">
+        #{uploadTime},
+      </if>
+      <if test="fileUrl != null">
+        #{fileUrl},
+      </if>
+      <if test="remark != null">
+        #{remark},
+      </if>
+      <if test="createTime != null">
+        #{createTime},
+      </if>
+      <if test="deleteFlag != null">
+        #{deleteFlag},
+      </if>
+      <if test="checksum != null">
+        #{checksum},
+      </if>
+    </trim>
+  </insert>
+  
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.VersionLib">
+    insert into t_version_lib
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="versionType != null">
+        VERSION_TYPE,
+      </if>
+      <if test="version != null">
+        VERSION,
+      </if>
+      <if test="fpgaVersion != null">
+        FPGA_VERSION,
+      </if>
+      <if test="bbuVersion != null">
+        BBU_VERSION,
+      </if>
+      <if test="swVersion != null">
+        SW_VERSION,
+      </if>
+      <if test="uploadUser != null">
+        UPLOAD_USER,
+      </if>
+      <if test="uploadTime != null">
+        UPLOAD_TIME,
+      </if>
+      <if test="fileUrl != null">
+        FILE_URL,
+      </if>
+      <if test="remark != null">
+        REMARK,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="deleteFlag != null">
+        DELETE_FLAG,
+      </if>
+      <if test="checksum != null">
+        CHECK_SUM,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="versionType != null">
+        #{versionType,jdbcType=TINYINT},
+      </if>
+      <if test="version != null">
+        #{version,jdbcType=VARCHAR},
+      </if>
+      <if test="fpgaVersion != null">
+        #{fpgaVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="bbuVersion != null">
+        #{bbuVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="swVersion != null">
+        #{swVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadUser != null">
+        #{uploadUser,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadTime != null">
+        #{uploadTime,jdbcType=VARCHAR},
+      </if>
+      <if test="fileUrl != null">
+        #{fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null">
+        #{deleteFlag,jdbcType=BIT},
+      </if>
+      <if test="checksum != null">
+        #{checksum,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.VersionLibExample" resultType="java.lang.Integer">
+    select count(*) from t_version_lib
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_version_lib
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.versionType != null">
+        VERSION_TYPE = #{record.versionType,jdbcType=TINYINT},
+      </if>
+      <if test="record.version != null">
+        VERSION = #{record.version,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fpgaVersion != null">
+        FPGA_VERSION = #{record.fpgaVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.bbuVersion != null">
+        BBU_VERSION = #{record.bbuVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.swVersion != null">
+        SW_VERSION = #{record.swVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.uploadUser != null">
+        UPLOAD_USER = #{record.uploadUser,jdbcType=VARCHAR},
+      </if>
+      <if test="record.uploadTime != null">
+        UPLOAD_TIME = #{record.uploadTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fileUrl != null">
+        FILE_URL = #{record.fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.remark != null">
+        REMARK = #{record.remark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deleteFlag != null">
+        DELETE_FLAG = #{record.deleteFlag,jdbcType=BIT},
+      </if>
+      <if test="record.checksum != null">
+        CHECK_SUM = #{record.checksum,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_version_lib
+    set ID = #{record.id,jdbcType=BIGINT},
+      VERSION_TYPE = #{record.versionType,jdbcType=TINYINT},
+      VERSION = #{record.version,jdbcType=VARCHAR},
+      FPGA_VERSION = #{record.fpgaVersion,jdbcType=VARCHAR},
+      BBU_VERSION = #{record.bbuVersion,jdbcType=VARCHAR},
+      SW_VERSION = #{record.swVersion,jdbcType=VARCHAR},
+      UPLOAD_USER = #{record.uploadUser,jdbcType=VARCHAR},
+      UPLOAD_TIME = #{record.uploadTime,jdbcType=VARCHAR},
+      FILE_URL = #{record.fileUrl,jdbcType=VARCHAR},
+      REMARK = #{record.remark,jdbcType=VARCHAR},
+      CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      DELETE_FLAG = #{record.deleteFlag,jdbcType=BIT},
+      CHECK_SUM = #{record.checksum,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.VersionLib">
+    update t_version_lib
+    <set>
+      <if test="versionType != null">
+        VERSION_TYPE = #{versionType,jdbcType=TINYINT},
+      </if>
+      <if test="version != null">
+        VERSION = #{version,jdbcType=VARCHAR},
+      </if>
+      <if test="fpgaVersion != null">
+        FPGA_VERSION = #{fpgaVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="bbuVersion != null">
+        BBU_VERSION = #{bbuVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="swVersion != null">
+        SW_VERSION = #{swVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadUser != null">
+        UPLOAD_USER = #{uploadUser,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadTime != null">
+        UPLOAD_TIME = #{uploadTime,jdbcType=VARCHAR},
+      </if>
+      <if test="fileUrl != null">
+        FILE_URL = #{fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null">
+        DELETE_FLAG = #{deleteFlag,jdbcType=BIT},
+      </if>
+      <if test="checksum != null">
+        CHECK_SUM = #{checksum,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.VersionLib">
+    update t_version_lib
+    set VERSION_TYPE = #{versionType,jdbcType=TINYINT},
+      VERSION = #{version,jdbcType=VARCHAR},
+      FPGA_VERSION = #{fpgaVersion,jdbcType=VARCHAR},
+      BBU_VERSION = #{bbuVersion,jdbcType=VARCHAR},
+      SW_VERSION = #{swVersion,jdbcType=VARCHAR},
+      UPLOAD_USER = #{uploadUser,jdbcType=VARCHAR},
+      UPLOAD_TIME = #{uploadTime,jdbcType=VARCHAR},
+      FILE_URL = #{fileUrl,jdbcType=VARCHAR},
+      REMARK = #{remark,jdbcType=VARCHAR},
+      CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      DELETE_FLAG = #{deleteFlag,jdbcType=BIT},
+      CHECK_SUM = #{checksum,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="deleteLibByPrimaryKey" parameterType="java.lang.Long">
+    update t_version_lib
+    set DELETE_FLAG  = 1
+    where ID = #{id}
+  </update>
+
+  <select id="queryUserNameById" parameterType="java.lang.String" resultType="java.lang.String">
+     select USER_NAME from t_user where ID = #{userId}
+  </select>
+  <!-- <resultMap id="BaseResultMap" type="com.iekun.ef.model.VersionLib">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="VERSION_TYPE" jdbcType="TINYINT" property="versionType" />
+    <result column="VERSION" jdbcType="VARCHAR" property="version" />
+    <result column="FPGA_VERSION" jdbcType="VARCHAR" property="fpgaVersion" />
+    <result column="BBU_VERSION" jdbcType="VARCHAR" property="bbuVersion" />
+    <result column="SW_VERSION" jdbcType="VARCHAR" property="swVersion" />
+    <result column="UPLOAD_USER" jdbcType="VARCHAR" property="uploadUser" />
+    <result column="UPLOAD_TIME" jdbcType="VARCHAR" property="uploadTime" />
+    <result column="FILE_URL" jdbcType="VARCHAR" property="fileUrl" />
+    <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="DELETE_FLAG" jdbcType="BIT" property="deleteFlag" />
+    <result column="CHECKSUM" jdbcType="VARCHAR" property="checksum" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, VERSION_TYPE, VERSION, FPGA_VERSION, BBU_VERSION, SW_VERSION, UPLOAD_USER, UPLOAD_TIME, 
+    FILE_URL, REMARK, CREATE_TIME, DELETE_FLAG, CHECKSUM
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.VersionLibExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_version_lib
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_version_lib
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_version_lib
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.VersionLibExample">
+    delete from t_version_lib
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.VersionLib">
+    insert into t_version_lib (ID, VERSION_TYPE, VERSION, 
+      FPGA_VERSION, BBU_VERSION, SW_VERSION, 
+      UPLOAD_USER, UPLOAD_TIME, FILE_URL, 
+      REMARK, CREATE_TIME, DELETE_FLAG, 
+      CHECKSUM)
+    values (#{id,jdbcType=BIGINT}, #{versionType,jdbcType=TINYINT}, #{version,jdbcType=VARCHAR}, 
+      #{fpgaVersion,jdbcType=VARCHAR}, #{bbuVersion,jdbcType=VARCHAR}, #{swVersion,jdbcType=VARCHAR}, 
+      #{uploadUser,jdbcType=VARCHAR}, #{uploadTime,jdbcType=VARCHAR}, #{fileUrl,jdbcType=VARCHAR}, 
+      #{remark,jdbcType=VARCHAR}, #{createTime,jdbcType=VARCHAR}, #{deleteFlag,jdbcType=BIT}, 
+      #{checksum,jdbcType=VARCHAR})
+  </insert>
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.VersionLib">
+    insert into t_version_lib
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="versionType != null">
+        VERSION_TYPE,
+      </if>
+      <if test="version != null">
+        VERSION,
+      </if>
+      <if test="fpgaVersion != null">
+        FPGA_VERSION,
+      </if>
+      <if test="bbuVersion != null">
+        BBU_VERSION,
+      </if>
+      <if test="swVersion != null">
+        SW_VERSION,
+      </if>
+      <if test="uploadUser != null">
+        UPLOAD_USER,
+      </if>
+      <if test="uploadTime != null">
+        UPLOAD_TIME,
+      </if>
+      <if test="fileUrl != null">
+        FILE_URL,
+      </if>
+      <if test="remark != null">
+        REMARK,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="deleteFlag != null">
+        DELETE_FLAG,
+      </if>
+      <if test="checksum != null">
+        CHECKSUM,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="versionType != null">
+        #{versionType,jdbcType=TINYINT},
+      </if>
+      <if test="version != null">
+        #{version,jdbcType=VARCHAR},
+      </if>
+      <if test="fpgaVersion != null">
+        #{fpgaVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="bbuVersion != null">
+        #{bbuVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="swVersion != null">
+        #{swVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadUser != null">
+        #{uploadUser,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadTime != null">
+        #{uploadTime,jdbcType=VARCHAR},
+      </if>
+      <if test="fileUrl != null">
+        #{fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null">
+        #{deleteFlag,jdbcType=BIT},
+      </if>
+      <if test="checksum != null">
+        #{checksum,jdbcType=VARCHAR},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.VersionLibExample" resultType="java.lang.Integer">
+    select count(*) from t_version_lib
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_version_lib
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.versionType != null">
+        VERSION_TYPE = #{record.versionType,jdbcType=TINYINT},
+      </if>
+      <if test="record.version != null">
+        VERSION = #{record.version,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fpgaVersion != null">
+        FPGA_VERSION = #{record.fpgaVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.bbuVersion != null">
+        BBU_VERSION = #{record.bbuVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.swVersion != null">
+        SW_VERSION = #{record.swVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.uploadUser != null">
+        UPLOAD_USER = #{record.uploadUser,jdbcType=VARCHAR},
+      </if>
+      <if test="record.uploadTime != null">
+        UPLOAD_TIME = #{record.uploadTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.fileUrl != null">
+        FILE_URL = #{record.fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="record.remark != null">
+        REMARK = #{record.remark,jdbcType=VARCHAR},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deleteFlag != null">
+        DELETE_FLAG = #{record.deleteFlag,jdbcType=BIT},
+      </if>
+      <if test="record.checksum != null">
+        CHECKSUM = #{record.checksum,jdbcType=VARCHAR},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_version_lib
+    set ID = #{record.id,jdbcType=BIGINT},
+      VERSION_TYPE = #{record.versionType,jdbcType=TINYINT},
+      VERSION = #{record.version,jdbcType=VARCHAR},
+      FPGA_VERSION = #{record.fpgaVersion,jdbcType=VARCHAR},
+      BBU_VERSION = #{record.bbuVersion,jdbcType=VARCHAR},
+      SW_VERSION = #{record.swVersion,jdbcType=VARCHAR},
+      UPLOAD_USER = #{record.uploadUser,jdbcType=VARCHAR},
+      UPLOAD_TIME = #{record.uploadTime,jdbcType=VARCHAR},
+      FILE_URL = #{record.fileUrl,jdbcType=VARCHAR},
+      REMARK = #{record.remark,jdbcType=VARCHAR},
+      CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      DELETE_FLAG = #{record.deleteFlag,jdbcType=BIT},
+      CHECKSUM = #{record.checksum,jdbcType=VARCHAR}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.VersionLib">
+    update t_version_lib
+    <set>
+      <if test="versionType != null">
+        VERSION_TYPE = #{versionType,jdbcType=TINYINT},
+      </if>
+      <if test="version != null">
+        VERSION = #{version,jdbcType=VARCHAR},
+      </if>
+      <if test="fpgaVersion != null">
+        FPGA_VERSION = #{fpgaVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="bbuVersion != null">
+        BBU_VERSION = #{bbuVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="swVersion != null">
+        SW_VERSION = #{swVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadUser != null">
+        UPLOAD_USER = #{uploadUser,jdbcType=VARCHAR},
+      </if>
+      <if test="uploadTime != null">
+        UPLOAD_TIME = #{uploadTime,jdbcType=VARCHAR},
+      </if>
+      <if test="fileUrl != null">
+        FILE_URL = #{fileUrl,jdbcType=VARCHAR},
+      </if>
+      <if test="remark != null">
+        REMARK = #{remark,jdbcType=VARCHAR},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="deleteFlag != null">
+        DELETE_FLAG = #{deleteFlag,jdbcType=BIT},
+      </if>
+      <if test="checksum != null">
+        CHECKSUM = #{checksum,jdbcType=VARCHAR},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.VersionLib">
+    update t_version_lib
+    set VERSION_TYPE = #{versionType,jdbcType=TINYINT},
+      VERSION = #{version,jdbcType=VARCHAR},
+      FPGA_VERSION = #{fpgaVersion,jdbcType=VARCHAR},
+      BBU_VERSION = #{bbuVersion,jdbcType=VARCHAR},
+      SW_VERSION = #{swVersion,jdbcType=VARCHAR},
+      UPLOAD_USER = #{uploadUser,jdbcType=VARCHAR},
+      UPLOAD_TIME = #{uploadTime,jdbcType=VARCHAR},
+      FILE_URL = #{fileUrl,jdbcType=VARCHAR},
+      REMARK = #{remark,jdbcType=VARCHAR},
+      CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      DELETE_FLAG = #{deleteFlag,jdbcType=BIT},
+      CHECKSUM = #{checksum,jdbcType=VARCHAR}
+    where ID = #{id,jdbcType=BIGINT}
+  </update> -->
+</mapper>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.EmailTemplateMapper">
+    <resultMap  type="com.iekun.ef.model.EmailTemplate" id="BaseResultMap">
+        <id column="ID" jdbcType="BIGINT" property="id" />
+        <result column="EVENT_TYPE" jdbcType="TINYINT" property="eventType" />
+        <result column="ACTIVE" jdbcType="TINYINT" property="active" />
+        <result column="EMAIL_SUBJECT" jdbcType="VARCHAR" property="subject" />
+        <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+        <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+        <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime" />
+        <result column="DELETE_FLAG" jdbcType="TINYINT" property="deleteFlag" />
+    </resultMap>
+    <resultMap extends="BaseResultMap" id="ResultMapWithBLOBs" type="com.iekun.ef.model.EmailTemplate">
+        <result column="CONTENT_TPL" jdbcType="LONGVARCHAR" property="contentTpl" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        ID, EVENT_TYPE, ACTIVE, EMAIL_SUBJECT, REMARK, CREATE_TIME, UPDATE_TIME, DELETE_FLAG
+    </sql>
+    <sql id="Blob_Column_List">
+        CONTENT_TPL
+    </sql>
+    <select id="getEmailTemplateCount"  resultType="java.lang.Long">
+        SELECT
+          COUNT(1)
+        FROM t_email_tpl
+        WHERE
+           DELETE_FLAG=0
+    </select>
+    <insert id="insertEmailTemplate" parameterType="com.iekun.ef.model.EmailTemplate">
+        INSERT INTO t_email_tpl
+          (
+             EVENT_TYPE,
+             ACTIVE,
+             EMAIL_SUBJECT,
+             CONTENT_TPL,
+             REMARK,
+             CREATE_TIME,
+             UPDATE_TIME,
+             DELETE_FLAG
+          )
+      VALUES
+         (
+            #{eventType,jdbcType=TINYINT},
+            #{active,jdbcType=TINYINT},
+            #{subject,jdbcType=VARCHAR},
+            #{contentTpl,jdbcType=LONGVARCHAR},
+            #{remark,jdbcType=VARCHAR},
+            #{createTime,jdbcType=VARCHAR},
+            #{updateTime,jdbcType=VARCHAR},
+            #{deleteFlag,jdbcType=TINYINT}
+        )
+    </insert>
+    <update id="updateEmailTemplate" parameterType="com.iekun.ef.model.EmailTemplate">
+        UPDATE t_email_tpl
+        SET
+            EVENT_TYPE = #{eventType,jdbcType=TINYINT},
+            ACTIVE = #{active,jdbcType=TINYINT},
+            EMAIL_SUBJECT = #{subject,jdbcType=VARCHAR},
+            CONTENT_TPL = #{contentTpl,jdbcType=LONGVARCHAR},
+            REMARK = #{remark,jdbcType=VARCHAR},
+            CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+            UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+            DELETE_FLAG = #{deleteFlag,jdbcType=TINYINT}
+        WHERE ID = #{id,jdbcType=BIGINT}
+    </update>
+    <select id="getEmailTemplateById" parameterType="java.lang.Long"  resultMap="ResultMapWithBLOBs">
+        SELECT
+            <include refid="Base_Column_List" />
+            ,
+            <include refid="Blob_Column_List" />
+        FROM t_email_tpl
+        WHERE
+           ID = #{id,jdbcType=BIGINT}
+    </select>
+    <select id="getEmailTemplateByEventType" parameterType="java.lang.Integer"  resultMap="ResultMapWithBLOBs">
+        SELECT
+            <include refid="Base_Column_List" />
+            ,
+            <include refid="Blob_Column_List" />
+        FROM t_email_tpl
+        WHERE
+            EVENT_TYPE = #{eventType,jdbcType=TINYINT}
+        AND
+            ACTIVE = 1
+        AND
+           DELETE_FLAG=0
+    </select>
+    <select id="getEmailTemplates"  resultMap="ResultMapWithBLOBs">
+        SELECT
+        <include refid="Base_Column_List" />
+        ,
+        <include refid="Blob_Column_List" />
+        FROM t_email_tpl
+        WHERE
+             DELETE_FLAG=0
+        ORDER BY CREATE_TIME ASC
+        LIMIT  #{start}, #{length}
+    </select>
+    <select id="getEmailTemplateAll"  resultMap="ResultMapWithBLOBs">
+        SELECT
+        <include refid="Base_Column_List" />
+        ,
+        <include refid="Blob_Column_List" />
+        FROM t_email_tpl
+        WHERE
+        DELETE_FLAG=0
+        ORDER BY CREATE_TIME DESC
+    </select>
+    <update id="updateDeleteFlagById" parameterType="java.lang.Long">
+        UPDATE t_email_tpl
+        SET
+            DELETE_FLAG = 1
+        WHERE ID = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateEmailTemplateActiveById" parameterType="java.lang.Long">
+        UPDATE t_email_tpl
+        SET
+            ACTIVE = 1
+        WHERE
+          ID = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateEmailTemplateInactiveById" parameterType="java.lang.Long">
+        UPDATE t_email_tpl
+        SET
+          ACTIVE = 0
+        WHERE
+          ID = #{id,jdbcType=BIGINT}
+    </update>
+    <update id="updateEmailTemplateInActiveByIdAndType" >
+        UPDATE t_email_tpl
+        SET
+          ACTIVE = 0
+        WHERE
+            EVENT_TYPE = #{eventType,jdbcType=TINYINT}
+        AND
+            ID != #{id,jdbcType=BIGINT}
+        AND
+            DELETE_FLAG = 0
+    </update>
+</mapper>

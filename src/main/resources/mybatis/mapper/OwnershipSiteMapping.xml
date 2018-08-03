@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.OwnershipSiteMapping">
+
+    <resultMap id="BaseResultMap" type="com.iekun.ef.model.OwnershipSite">
+        <id column="ID"  property="id" />
+        <result column="NAME"  property="name" />
+        <result column="OWNERSHIP" property="ownership"></result>
+        <result column="SITE" property="site"></result>
+        <result column="WARNING" property="warning"></result>
+        <result column="CREATE_TIME" property="createTime"></result>
+        <result column="START_TIME" property="startTime"></result>
+        <result column="OVERDUE_TIME" property="OverdueTime"></result>
+        <result column="REMARK" property="remark"></result>
+        <result column="CREATOR_ID" property="creatorId"></result>
+    </resultMap>
+
+    <resultMap id="BaseResultMap1" type="com.iekun.ef.model.SelfAreaCode">
+        <id column="ID" property="id"></id>
+        <result column="PROVINCE_CODE" property="provinceCode"></result>
+        <result column="PROVINCE_NAME" property="provinceName"></result>
+        <result column="CITY_CODE" property="cityCode"></result>
+        <result column="CITY_NAME" property="cityName"></result>
+        <result column="LEVEL" property="level"></result>
+    </resultMap>
+
+    <resultMap id="BaseResultMap2" type="com.iekun.ef.model.Site">
+        <id column="ID"  property="id" />
+        <result column="NAME"  property="name" />
+    </resultMap>
+
+    <resultMap id="WarningSite" type="com.iekun.ef.model.SiteWarningMapping">
+        <id column="ID" property="id"></id>
+        <result column="WARNING_ID" property="warningId"></result>
+        <result column="SITE_ID" property="siteId"></result>
+    </resultMap>
+
+    <!--通过用户Id查询所有站点信息-->
+    <select id="queryAllSiteByUserId" resultMap="BaseResultMap2">
+        select distinct
+            a.ID,a.NAME
+        from
+            t_site a,t_site_user b
+        where
+            a.ID=b.SITE_ID
+        and
+            b.DELETE_FLAG=0
+        and
+            b.USER_ID=#{userId}
+    </select>
+
+    <!--通过id查询站点名字-->
+    <select id="querySiteName" parameterType="java.lang.Long" resultType="java.lang.String">
+        select
+            NAME
+        from
+            t_site
+        where
+            id = #{siteId}
+    </select>
+
+    <!--将站点ID和分组ID存入映射-->
+    <insert id="insertWarningSite" parameterType="com.iekun.ef.model.SiteWarningMapping">
+        insert into
+            t_warning_site (WARNING_ID,SITE_ID)
+        values
+            (#{warningId},#{siteId})
+    </insert>
+
+    <!--查询省份和城市名字-->
+    <select id="queryOwnershipNameById" parameterType="java.lang.Long" resultMap="BaseResultMap1">
+        select
+            PROVINCE_NAME,CITY_NAME
+        from
+            t_self_area_code
+        where
+            PROVINCE_CODE = #{0}
+        and
+            CITY_CODE = #{1}
+    </select>
+
+    <!--将区域ID和分组ID存入映射-->
+    <insert id="insertWarningArea" parameterType="com.iekun.ef.model.SiteAreaMapping">
+        insert into
+            t_warning_area (WARNING_ID,AREA_ID)
+        values
+            (#{warningId},#{areaId})
+    </insert>
+
+    <!--添加分组-->
+    <insert id="insertGroup" parameterType="com.iekun.ef.model.OwnershipSite">
+        insert into
+            t_warning (ID,NAME,OWNERSHIP,SITE,WARNING,CREATE_TIME,START_TIME,OVERDUE_TIME,REMARK,CREATOR_ID)
+        values
+            (#{id},#{name},#{ownership},#{site},#{warning},#{createTime},#{startTime},#{OverdueTime},#{remark},#{creatorId})
+    </insert>
+
+    <!--查询所有分组-->
+    <select id="queryAllGroup" parameterType="java.lang.Long" resultMap="BaseResultMap">
+        select
+            ID,NAME,OWNERSHIP,SITE,WARNING,CREATE_TIME,START_TIME,OVERDUE_TIME,REMARK,CREATOR_ID
+        from
+            t_warning
+        where
+            CREATOR_ID = #{creatorId}
+    </select>
+
+    <!--删除分组-->
+    <delete id="delGrouplist" parameterType="java.util.HashMap" >
+        delete from t_warning where ID in
+        <foreach collection="groupIds" item="groupId" open="(" close=")" separator=",">
+            #{groupId}
+        </foreach>
+    </delete>
+
+    <!--删除分组站点映射关系-->
+    <delete id="delSiteMapping" parameterType="java.util.HashMap">
+        delete from
+            t_warning_site
+        where
+            WARNING_ID
+        in
+        <foreach collection="groupIds" item="groupId" open="(" close=")" separator=",">
+            #{groupId}
+        </foreach>
+    </delete>
+
+    <!--删除分组区域映射关系-->
+    <delete id="delAreaMapping" parameterType="java.util.HashMap">
+        delete from
+            t_warning_area
+        where
+            WARNING_ID
+        in
+        <foreach collection="groupIds" item="groupId" open="(" close=")" separator=",">
+            #{groupId}
+        </foreach>
+    </delete>
+
+    <!--更新分组信息-->
+    <update id="updateGroup" parameterType="com.iekun.ef.model.OwnershipSite">
+        update t_warning set
+        NAME = #{name},
+        OWNERSHIP = #{ownership},
+        SITE = #{site},
+        WARNING = #{warning},
+        CREATE_TIME = #{createTime},
+        START_TIME = #{startTime},
+        OVERDUE_TIME = #{OverdueTime},
+        REMARK = #{remark},
+        CREATOR_ID =#{creatorId}
+        where
+        ID = #{id}
+    </update>
+
+    <!--更新时删除分组站点映射关系-->
+    <delete id="delupSiteMapping" parameterType="java.lang.String">
+        delete from
+             t_warning_site
+        where
+              WARNING_ID = #{groupId}
+    </delete>
+
+    <!--更新时删除分组归属地映射关系-->
+    <delete id="delupAreaMapping" parameterType="java.lang.String">
+        delete from
+             t_warning_area
+        where
+             WARNING_ID = #{groupId}
+    </delete>
+
+    <!--通过分组ID查询站点ID-->
+    <select id="querySiteIdByGroupId" parameterType="java.lang.String" resultType="java.util.Map">
+        select
+            SITE_ID
+        from
+            t_warning_site
+        where
+            WARNING_ID = #{groupId}
+    </select>
+
+    <!--通过分组ID查询站点ID-->
+    <select id="queryOwnershipIdByGroupId" parameterType="java.lang.String" resultType="java.util.Map">
+        select
+           AREA_ID
+        from
+          t_warning_area
+        where
+           WARNING_ID = #{groupId}
+    </select>
+</mapper>

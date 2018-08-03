@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.ShardingTabInfoMapper">
+    <resultMap type="com.iekun.ef.model.ShardingTabInfo" id="BaseResultMap" >
+        <result column="SHARDING_TAB_NAME" jdbcType="VARCHAR" property="tableName" />
+        <result column="SHARDING_TAB_DATE" jdbcType="VARCHAR" property="createDate" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        SHARDING_TAB_NAME, SHARDING_TAB_DATE
+    </sql>
+    <insert id="insertTabInfo" parameterType="com.iekun.ef.model.ShardingTabInfo">
+        INSERT INTO t_sharding_tab_info
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="tableName != null">
+                SHARDING_TAB_NAME,
+            </if>
+            <if test="createDate != null">
+                SHARDING_TAB_DATE,
+            </if>
+        </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="tableName != null">
+                #{tableName,jdbcType=VARCHAR},
+            </if>
+            <if test="createDate != null">
+                #{createDate,jdbcType=VARCHAR},
+            </if>
+        </trim>
+    </insert>
+    <select id="selectAll" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM t_sharding_tab_info
+    </select>
+    <select id="selectByDate" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM t_sharding_tab_info
+        <where>
+            <if test="startDate != null">
+                <![CDATA[  #{startDate} <= SHARDING_TAB_DATE ]]>
+            </if>
+            <if test="endDate != null">
+               AND <![CDATA[  #{endDate} >= SHARDING_TAB_DATE ]]>
+            </if>
+        </where>
+        ORDER BY SHARDING_TAB_DATE ASC
+    </select>
+    <select id="selectByOneDay" resultMap="BaseResultMap">
+        SELECT
+        <include refid="Base_Column_List" />
+        FROM t_sharding_tab_info
+        WHERE SHARDING_TAB_DATE = #{oneDay}
+    </select>
+</mapper>

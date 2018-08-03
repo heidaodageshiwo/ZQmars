@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.AnalysisJobMapper">
+    <resultMap id="BaseResultMap" type="com.iekun.ef.model.DataAnalysis">
+        <id column="ID"  property="id" />
+        <result column="TYPE"  property="type" />
+        <result column="NAME"  property="name" />
+        <result column="CREATOR_ID"  property="creatorId" />
+        <result column="CREATOR_NAME"  property="creatorName" />
+        <result column="APP_ID"  property="appId" />
+        <result column="FILTER"  property="filter" />
+        <result column="STATUS"  property="status" />
+        <result column="PROGRESS"  property="progress" />
+        <result column="CREATE_TIME"  property="createTime" />
+        <result column="END_TIME"  property="endTime" />
+        <result column="REMARK"  property="remark" />
+        <result column="DELETE_FLAG"  property="deleteFlag" />
+        <result column="PARAMETER"  property="parameter" />
+    </resultMap>
+
+    <resultMap id="UeinfoMap" type="com.iekun.ef.model.UeInfo">
+        <id column="ID"  property="id" />
+        <result column="IMSI"  property="imsi" />
+        <result column="SITE_NAME"  property="siteName" />
+        <result column="CAPTURE_TIME"  property="captureTime" />
+    </resultMap>
+
+    <!--创建任务-->
+    <insert id="creatorJob" parameterType="com.iekun.ef.model.DataAnalysis">
+        insert into t_analysis_job
+            (ID,TYPE,NAME,CREATOR_ID,CREATOR_NAME,APP_ID,FILTER,STATUS,PROGRESS,CREATE_TIME,END_TIME,REMARK,DELETE_FLAG,PARAMETER)
+        values
+            (#{id},#{type},#{name},#{creatorId},#{creatorName},#{appId},#{filter},#{status},#{progress},#{createTime},#{endTime},#{remark},#{deleteFlag},#{parameter})
+    </insert>
+
+    <!--查询任务-->
+    <select id="queryData" parameterType="java.util.Map" resultMap="BaseResultMap" >
+        select
+            ID,TYPE,NAME,CREATOR_ID,CREATOR_NAME,APP_ID,FILTER,STATUS,PROGRESS,CREATE_TIME,END_TIME,REMARK,DELETE_FLAG,PARAMETER
+        from
+            t_analysis_job
+        where
+            DELETE_FLAG = 0
+        and
+            TYPE = #{type}
+        and
+            CREATOR_ID = #{creatorId}
+    </select>
+
+    <!--删除任务-->
+    <update id="updateDeleteFlag" parameterType="java.lang.String">
+        update t_analysis_job set
+            DELETE_FLAG = 1
+        where
+            id = #{taskId}
+    </update>
+
+    <select id="getAnalysisJob" parameterType="java.util.Map">
+        select
+            ID,TYPE,NAME,CREATOR_ID,CREATOR_NAME,APP_ID,FILTER,STATUS,PROGRESS,CREATE_TIME,END_TIME,REMARK,DELETE_FLAG,PARAMETER
+        from
+            t_analysis_job
+        where
+            CREATOR_ID = #{creatorId}
+        and
+            STATUS != 2
+        and
+            DELETE_FLAG = 0
+    </select>
+
+    <select id="getDataCollideTaskById" parameterType="java.lang.String" resultMap="BaseResultMap">
+        select
+            ID,TYPE,NAME,CREATOR_ID,CREATOR_NAME,APP_ID,FILTER,STATUS,PROGRESS,CREATE_TIME,END_TIME,REMARK,DELETE_FLAG,PARAMETER
+        from
+            t_analysis_job
+        where
+            DELETE_FLAG = 0
+        and
+            ID = #{taskId}
+    </select>
+
+    <!--imsi号码对应的站点信息-->
+    <select id="showThisRowData" parameterType="java.util.Map" resultMap="UeinfoMap">
+        select
+            IMSI,SITE_NAME,CAPTURE_TIME
+        from
+            ${tableName}
+        where
+            imsi = #{imsi}
+        order by
+            CAPTURE_TIME desc
+    </select>
+
+    <!--通过imsi查询对应站点-->
+    <select id="querySitesByImsi" parameterType="java.util.Map" resultType="java.lang.String">
+        select
+            SITE_NAME
+        from
+            ${tableName}
+        where
+            IMSI = #{imsi}
+    </select>
+
+    <!--查询详情-->
+    <select id="queryRowDataCollide" parameterType="java.util.Map" resultType="java.util.Map">
+        select * from
+        (SELECT imsi, count(*) as imsiCount FROM ${tableName}
+        group by IMSI ) ta
+        ,
+        (
+        SELECT imsi, count(*) as siteCount from
+        (
+        SELECT distinct imsi, SITE_SN FROM ${tableName}
+        ) t1
+        group by imsi
+        ) tb
+        where
+        ta.IMSI = tb.IMSI
+        order by tb.siteCount desc
+    </select>
+
+    <select id="queryRowDataCollideByImsi" parameterType="java.util.Map" resultType="java.util.Map">
+         select * from
+        (SELECT imsi, count(*) as imsiCount FROM ${tableName}
+        group by IMSI ) ta
+        ,
+        (
+        SELECT imsi, count(*) as siteCount from
+        (
+        SELECT distinct imsi, SITE_SN FROM ${tableName}
+        ) t1
+        group by imsi
+        ) tb
+        ,
+        ${targetTable} tc
+        where
+        ta.IMSI = tb.IMSI
+        and
+        ta.IMSI = tc.IMSI
+        order by tc.IMSI_COUNT desc
+    </select>
+
+    <!--查询总数-->
+    <select id="queryCountByTaskId" parameterType="java.util.Map" resultType="java.lang.Integer">
+        select count(*) from ${tableName}
+    </select>
+
+    <!--分批次查询-->
+    <select id="queryDataToCreateFile" parameterType="java.util.Map" resultMap="UeinfoMap">
+        select
+            IMSI,SITE_NAME,CAPTURE_TIME
+        from
+            ${tableName}
+        order by
+			CAPTURE_TIME
+        limit
+            #{start},#{length}
+    </select>
+
+    <!--imsi伴随分析查询详情-->
+    <select id="imsiFollowDetails" parameterType="java.util.Map" resultType="java.util.Map">
+        select
+            IMSI as imsi,IMSI_COUNT as imsiCount
+        from
+            ${targetTable}
+    </select>
+
+
+</mapper>

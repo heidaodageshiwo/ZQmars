@@ -1,0 +1,179 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.NewHistoryMapper">
+<resultMap type="com.iekun.ef.model.UeInfo" id="BaseResultMap" >
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+    <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+    <result column="IMSI" jdbcType="VARCHAR" property="imsi" />
+    <result column="IMEI" jdbcType="VARCHAR" property="imei" />
+    <result column="STMSI" jdbcType="VARCHAR" property="stmsi" />
+    <result column="MAC" jdbcType="VARCHAR" property="mac" />
+    <result column="LATYPE" jdbcType="VARCHAR" property="latype" />
+    <result column="INDICATION" jdbcType="TINYINT" property="indication" />
+    <result column="REALTIME" jdbcType="BIT" property="realtime" />
+    <result column="CAPTURE_TIME" jdbcType="VARCHAR" property="captureTime" />
+    <result column="RARTA" jdbcType="BIGINT" property="rarta" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="CITY_NAME" jdbcType="VARCHAR" property="cityName" />
+    <result column="BAND" jdbcType="VARCHAR" property="band" />
+    <result column="OPERATOR" jdbcType="VARCHAR" property="operator" />
+    <result column="SITE_SN" jdbcType="VARCHAR" property="siteSn" />
+</resultMap>
+
+    <!--查询时间插件开始时间-->
+    <select id="getUeinfoToDaterangepicker" resultType="java.lang.String">
+        select
+          SHARDING_TAB_DATE
+        from
+          t_sharding_tab_info
+        order by
+          SHARDING_TAB_DATE
+        limit
+          0,1
+    </select>
+
+    <!--查询总数-->
+    <select id="selectSCount" parameterType="java.lang.String" resultType="java.lang.Integer">
+        select
+            count(*)
+        from
+            ${tableName}
+    </select>
+
+    <!--根据查询条件查询总数-->
+    <select id="selectWCount" parameterType="com.iekun.ef.model.NewHistoryParamsEntity" resultType="java.lang.Integer">
+        select
+            count(*)
+        from
+            ${tableName}
+        where
+        <choose>
+            <when test="filterStart == '00:00:00' and filterEnd == '23:59:59'">
+                1 = 1
+            </when>
+            <otherwise>
+                CAPTURE_TIME &gt;= #{startTime}
+                and
+                CAPTURE_TIME &lt;= #{endTime}
+            </otherwise>
+        </choose>
+        <if test="imsi != null and imsi != ''">
+            and  IMSI = #{imsi}
+        </if>
+        <if test="imei != null and imei != ''">
+            and  IMEI = #{imei}
+        </if>
+        <if test="operator != null and operator != ''">
+            and    OPERATOR = #{operator}
+        </if>
+        <if test="area != null and area != ''" >
+            and    CITY_NAME LIKE '%${area}%'
+        </if>
+        <if test="siteSn != null and siteSn != ''">
+            and    SITE_SN = #{siteSn}
+        </if>
+        <if test="deviceSn != null and deviceSn != ''">
+            and    DEVICE_SN = #{deviceSn}
+        </if>
+    </select>
+
+    <!--根据查询条件分页查询-->
+    <select id="selectHistoryRecords" parameterType="java.util.Map" resultMap="BaseResultMap">
+        select
+            ID,SITE_NAME,DEVICE_SN,IMSI,IMEI,STMSI,MAC,LATYPE,INDICATION,REALTIME,CAPTURE_TIME,RARTA,CREATE_TIME,CITY_NAME,BAND,OPERATOR,SITE_SN
+        from
+            ${tableName}
+        where
+        <choose>
+            <when test="filterStart == '00:00:00' and filterEnd == '23:59:59'">
+                1 = 1
+            </when>
+            <otherwise>
+                CAPTURE_TIME &gt;= #{startTime}
+                and
+                CAPTURE_TIME &lt;= #{endTime}
+            </otherwise>
+        </choose>
+        <if test="imsi != null and imsi != ''">
+            and  IMSI = #{imsi}
+        </if>
+        <if test="imei != null and imei != ''">
+            and IMEI = #{imei}
+        </if>
+        <if test="operator != null and operator != ''">
+            and    OPERATOR = #{operator}
+        </if>
+        <if test="area != null and area != ''">
+           and    CITY_NAME LIKE '%${area}%'
+        </if>
+        <if test="siteSn != null and siteSn != ''">
+           and    SITE_SN = #{siteSn}
+        </if>
+        <if test="devinceSn != null and devinceSn != ''">
+            and DEVICE_SN = #{devinceSn}
+        </if>
+        order by
+            CAPTURE_TIME DESC
+        limit
+            #{startIdx},#{limit}
+    </select>
+
+    <!--查询数据导出-->
+    <select id="queryUeinfo" parameterType="java.util.Map" resultMap="BaseResultMap">
+        select
+            ID,SITE_NAME,DEVICE_SN,IMSI,IMEI,STMSI,MAC,LATYPE,INDICATION,REALTIME,CAPTURE_TIME,RARTA,CREATE_TIME,CITY_NAME,BAND,OPERATOR,SITE_SN
+        from
+            ${tableName}
+        where
+        <choose>
+            <when test="filterStart == '00:00:00' and filterEnd == '23:59:59'">
+                1 = 1
+            </when>
+            <otherwise>
+                CAPTURE_TIME &gt;= #{startTime}
+                and
+                CAPTURE_TIME &lt;= #{endTime}
+            </otherwise>
+        </choose>
+        <if test="imsi != null and imsi != ''">
+            and  IMSI = #{imsi}
+        </if>
+        <if test="imei != null and imei != ''">
+            and IMEI = #{imei}
+        </if>
+        <if test="operator != null and operator != ''">
+            and    OPERATOR = #{operator}
+        </if>
+        <if test="area != null and area != ''">
+            and    CITY_NAME LIKE '%${area}%'
+        </if>
+        <if test="siteSn != null and siteSn != ''">
+            and    SITE_SN = #{siteSn}
+        </if>
+        <if test="devinceSn != null and devinceSn != ''">
+            and DEVICE_SN = #{devinceSn}
+        </if>
+        order by
+        CAPTURE_TIME DESC
+        limit
+            #{start},#{length}
+    </select>
+
+    <!--通过用户ID查询对应的站点-->
+    <select id="querySiteByUserId" parameterType="java.lang.Long" resultType="com.iekun.ef.model.Site">
+        SELECT
+        a.ID,a.SN,a.NAME,a.PROVINCE_ID,a.PROVINCE_NAME,a.CITY_ID,a.CITY_NAME,a.TOWN_ID,a.TOWN_NAME
+        from
+        t_site a,t_site_user b
+        where
+        b.USER_ID = #{userId}
+        and
+        a.ID = b.SITE_ID
+        and
+        a.DELETE_FLAG = 0
+        and
+        b.DELETE_FLAG = 0
+    </select>
+
+</mapper>

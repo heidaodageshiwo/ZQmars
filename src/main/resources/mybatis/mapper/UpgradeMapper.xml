@@ -1,0 +1,1220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.UpgradeMapper">
+  <resultMap  type="com.iekun.ef.model.Upgrade" id="BaseResultMap">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="VERSION_ID" jdbcType="BIGINT" property="versionId" />
+    <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+    <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+    <result column="VERSION" jdbcType="VARCHAR" property="version" />
+    <result column="OLD_VERSION" jdbcType="VARCHAR" property="oldVersion" />
+    <result column="OLD_FPGA_VERSION" jdbcType="VARCHAR" property="oldFpgaVersion" />
+    <result column="OLD_BBU_VERSION" jdbcType="VARCHAR" property="oldBbuVersion" />
+    <result column="OLD_SW_VERSION" jdbcType="VARCHAR" property="oldSwVersion" />
+    <result column="SCHEDULE_TIME" jdbcType="VARCHAR" property="scheduleTime" />
+    <result column="SUCCESS_TIME" jdbcType="VARCHAR" property="successTime" />
+    <result column="RETRTIES" jdbcType="TINYINT" property="retrties" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime" />
+    <result column="FILE_URL" jdbcType="VARCHAR" property="fileUrl" />
+    <result column="CHECK_SUM" jdbcType="VARCHAR" property="checkSum" />
+    <result column="STATUS_FLAG" jdbcType="TINYINT" property="statusFlag" />
+    
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, VERSION_ID, SITE_NAME, DEVICE_SN, OLD_VERSION, OLD_FPGA_VERSION, OLD_BBU_VERSION, 
+    OLD_SW_VERSION, SCHEDULE_TIME, SUCCESS_TIME, RETRTIES, CREATE_TIME, UPDATE_TIME, 
+    STATUS_FLAG
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.UpgradeExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_upgrade
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_upgrade
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  
+  <select id="getUpgradeList" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_upgrade
+    where 1=1
+  </select>
+  
+  <select id="selectUnsuccDvVerList" parameterType="java.util.Map" resultMap="BaseResultMap">
+   select
+    TU.ID,
+    TU.DEVICE_SN,
+    TV.VERSION,
+    TU.STATUS_FLAG,
+    TV.CHECK_SUM,
+    TU.RETRTIES,
+    TV.FILE_URL 
+    from t_upgrade TU
+    left join t_version_lib TV on TV.ID = TU.VERSION_ID
+    where 1=1
+    <if test="maxRetries != null">  
+     AND #{maxRetries} > TU.RETRTIES
+    </if> 
+    <if test="status != null">  
+     AND TU.STATUS_FLAG = #{status}  
+    </if> 
+  
+  </select>
+  
+  <select id="selectUpgradeList" parameterType="java.util.Map" resultMap="BaseResultMap">
+    select * from (select * from (select
+    TU.SITE_NAME,
+    TU.DEVICE_SN,
+    TU.CREATE_TIME,
+    TU.SUCCESS_TIME,
+    TU.OLD_VERSION,
+    TV.VERSION,
+    TS.SN,
+    TU.STATUS_FLAG 
+    from t_upgrade TU
+    left join t_version_lib TV on TV.ID = TU.VERSION_ID
+    left join t_site TS on TS.NAME = TU.SITE_NAME
+    where 1=1
+    <if test="deviceSn != null">  
+     AND TU.DEVICE_SN = #{deviceSn}  
+    </if> 
+    <if test="version != null">  
+     AND TU.VERSION_ID = #{version}  
+    </if>
+    <if test="status != null">  
+     AND TU.STATUS_FLAG = #{status}  
+    </if> 
+    <if test="startDate != null">  
+      AND TU.CREATE_TIME > #{startDate} AND  #{endDate} > TU.CREATE_TIME
+    </if>) as tempTable 
+    <if test="sites!=null">
+      where SN in
+      <foreach  item="item" collection="sites"
+               index="index" open="(" close=")" separator=",">
+        #{item.sn,jdbcType=VARCHAR}
+      </foreach>
+    </if>)as finalTable where 1=1  
+   <if test="start != null and length != null"> 
+      order by finalTable.CREATE_TIME DESC
+      limit #{start}, #{length}
+    </if>
+  </select>
+  
+  <select id="getUpgradeCnt" parameterType="java.util.Map" resultType="java.lang.Long">
+    select count(1) from (select * from ( select
+    TU.SITE_NAME,
+    TU.DEVICE_SN,
+    TU.CREATE_TIME,
+    TU.SUCCESS_TIME,
+    TU.OLD_VERSION,
+    TV.VERSION,
+    TS.SN, 
+    TU.STATUS_FLAG 
+    from t_upgrade TU
+    left join t_version_lib TV on TV.ID = TU.VERSION_ID
+    left join t_site TS on TS.NAME = TU.SITE_NAME
+    where 1=1
+     <if test="deviceSn != null">  
+     AND TU.DEVICE_SN = #{deviceSn}  
+    </if> 
+    <if test="version != null">  
+     AND TV.VERSION = #{version}  
+    </if>
+    <if test="status != null">  
+     AND TU.STATUS_FLAG = #{status}  
+    </if> 
+    <if test="startDate != null">  
+      AND TU.CREATE_TIME > #{startDate} AND  #{endDate} > TU.CREATE_TIME
+    </if>) as temp_upgrade 
+    <if test="sites!=null">
+      where SN in
+      <foreach  item="item" collection="sites"
+               index="index" open="(" close=")" separator=",">
+        #{item.sn,jdbcType=VARCHAR}
+      </foreach>
+    </if>) as finalTable
+  </select>
+  
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_upgrade
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.UpgradeExample">
+    delete from t_upgrade
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.Upgrade">
+    insert into t_upgrade (ID, VERSION_ID, SITE_NAME, 
+      DEVICE_SN, OLD_VERSION, OLD_FPGA_VERSION, 
+      OLD_BBU_VERSION, OLD_SW_VERSION, SCHEDULE_TIME, 
+      SUCCESS_TIME, RETRTIES, CREATE_TIME, 
+      UPDATE_TIME, STATUS_FLAG)
+    values (#{id,jdbcType=BIGINT}, #{versionId,jdbcType=BIGINT}, #{siteName,jdbcType=VARCHAR}, 
+      #{deviceSn,jdbcType=VARCHAR}, #{oldVersion,jdbcType=VARCHAR}, #{oldFpgaVersion,jdbcType=VARCHAR}, 
+      #{oldBbuVersion,jdbcType=VARCHAR}, #{oldSwVersion,jdbcType=VARCHAR}, #{scheduleTime,jdbcType=VARCHAR}, 
+      #{successTime,jdbcType=VARCHAR}, #{retrties,jdbcType=TINYINT}, #{createTime,jdbcType=VARCHAR}, 
+      #{updateTime,jdbcType=VARCHAR}, #{statusFlag,jdbcType=TINYINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.Upgrade">
+    insert into t_upgrade
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="versionId != null">
+        VERSION_ID,
+      </if>
+      <if test="siteName != null">
+        SITE_NAME,
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN,
+      </if>
+      <if test="oldVersion != null">
+        OLD_VERSION,
+      </if>
+      <if test="oldFpgaVersion != null">
+        OLD_FPGA_VERSION,
+      </if>
+      <if test="oldBbuVersion != null">
+        OLD_BBU_VERSION,
+      </if>
+      <if test="oldSwVersion != null">
+        OLD_SW_VERSION,
+      </if>
+      <if test="scheduleTime != null">
+        SCHEDULE_TIME,
+      </if>
+      <if test="successTime != null">
+        SUCCESS_TIME,
+      </if>
+      <if test="retrties != null">
+        RETRTIES,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME,
+      </if>
+      <if test="statusFlag != null">
+        STATUS_FLAG,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="versionId != null">
+        #{versionId,jdbcType=BIGINT},
+      </if>
+      <if test="siteName != null">
+        #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="oldVersion != null">
+        #{oldVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="oldFpgaVersion != null">
+        #{oldFpgaVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="oldBbuVersion != null">
+        #{oldBbuVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="oldSwVersion != null">
+        #{oldSwVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="scheduleTime != null">
+        #{scheduleTime,jdbcType=VARCHAR},
+      </if>
+      <if test="successTime != null">
+        #{successTime,jdbcType=VARCHAR},
+      </if>
+      <if test="retrties != null">
+        #{retrties,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="statusFlag != null">
+        #{statusFlag,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.UpgradeExample" resultType="java.lang.Integer">
+    select count(*) from t_upgrade
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_upgrade
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.versionId != null">
+        VERSION_ID = #{record.versionId,jdbcType=BIGINT},
+      </if>
+      <if test="record.siteName != null">
+        SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deviceSn != null">
+        DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="record.oldVersion != null">
+        OLD_VERSION = #{record.oldVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.oldFpgaVersion != null">
+        OLD_FPGA_VERSION = #{record.oldFpgaVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.oldBbuVersion != null">
+        OLD_BBU_VERSION = #{record.oldBbuVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.oldSwVersion != null">
+        OLD_SW_VERSION = #{record.oldSwVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.scheduleTime != null">
+        SCHEDULE_TIME = #{record.scheduleTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.successTime != null">
+        SUCCESS_TIME = #{record.successTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.retrties != null">
+        RETRTIES = #{record.retrties,jdbcType=TINYINT},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.updateTime != null">
+        UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.statusFlag != null">
+        STATUS_FLAG = #{record.statusFlag,jdbcType=TINYINT},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_upgrade
+    set ID = #{record.id,jdbcType=BIGINT},
+      VERSION_ID = #{record.versionId,jdbcType=BIGINT},
+      SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      OLD_VERSION = #{record.oldVersion,jdbcType=VARCHAR},
+      OLD_FPGA_VERSION = #{record.oldFpgaVersion,jdbcType=VARCHAR},
+      OLD_BBU_VERSION = #{record.oldBbuVersion,jdbcType=VARCHAR},
+      OLD_SW_VERSION = #{record.oldSwVersion,jdbcType=VARCHAR},
+      SCHEDULE_TIME = #{record.scheduleTime,jdbcType=VARCHAR},
+      SUCCESS_TIME = #{record.successTime,jdbcType=VARCHAR},
+      RETRTIES = #{record.retrties,jdbcType=TINYINT},
+      CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      STATUS_FLAG = #{record.statusFlag,jdbcType=TINYINT}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateUpgrade" parameterType="java.util.Map">
+    update t_upgrade
+    <set>
+      <if test="result != null">
+        RESULT_DISCRIPTION = #{result},
+      </if>
+      <if test="sucessTime != null">
+        SUCCESS_TIME = #{sucessTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME = #{updateTime},
+      </if>
+      <if test="statusFlag != null">
+        STATUS_FLAG = #{statusFlag},
+      </if>
+    </set>
+    where DEVICE_SN = #{deviceSn} and STATUS_FLAG = 0
+  </update>
+  
+   <update id="updateUpgradeOfMaxTryTimes" parameterType="java.util.Map">
+    update t_upgrade
+    <set>
+      <if test="result != null">
+        RESULT_DISCRIPTION = #{result},
+      </if>
+     <if test="updateTime != null">
+        UPDATE_TIME = #{updateTime},
+      </if>
+      <if test="statusFlag != null">
+        STATUS_FLAG = #{statusFlag},
+      </if>
+     </set>
+    where RETRTIES = #{maxTryTimes} and STATUS_FLAG = 0
+  </update>
+  
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.Upgrade">
+    update t_upgrade
+    <set>
+      <if test="versionId != null">
+        VERSION_ID = #{versionId,jdbcType=BIGINT},
+      </if>
+      <if test="siteName != null">
+        SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="oldVersion != null">
+        OLD_VERSION = #{oldVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="oldFpgaVersion != null">
+        OLD_FPGA_VERSION = #{oldFpgaVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="oldBbuVersion != null">
+        OLD_BBU_VERSION = #{oldBbuVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="oldSwVersion != null">
+        OLD_SW_VERSION = #{oldSwVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="scheduleTime != null">
+        SCHEDULE_TIME = #{scheduleTime,jdbcType=VARCHAR},
+      </if>
+      <if test="successTime != null">
+        SUCCESS_TIME = #{successTime,jdbcType=VARCHAR},
+      </if>
+      <if test="retrties != null">
+        RETRTIES = #{retrties,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="statusFlag != null">
+        STATUS_FLAG = #{statusFlag,jdbcType=TINYINT},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.Upgrade">
+    update t_upgrade
+    set VERSION_ID = #{versionId,jdbcType=BIGINT},
+      SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      OLD_VERSION = #{oldVersion,jdbcType=VARCHAR},
+      OLD_FPGA_VERSION = #{oldFpgaVersion,jdbcType=VARCHAR},
+      OLD_BBU_VERSION = #{oldBbuVersion,jdbcType=VARCHAR},
+      OLD_SW_VERSION = #{oldSwVersion,jdbcType=VARCHAR},
+      SCHEDULE_TIME = #{scheduleTime,jdbcType=VARCHAR},
+      SUCCESS_TIME = #{successTime,jdbcType=VARCHAR},
+      RETRTIES = #{retrties,jdbcType=TINYINT},
+      CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      STATUS_FLAG = #{statusFlag,jdbcType=TINYINT}
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <!-- <resultMap id="BaseResultMap" type="com.iekun.ef.model.Upgrade">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="VERSION_ID" jdbcType="BIGINT" property="versionId" />
+    <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+    <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+    <result column="OLD_VERSION" jdbcType="VARCHAR" property="oldVersion" />
+    <result column="OLD_FPGA_VERSION" jdbcType="VARCHAR" property="oldFpgaVersion" />
+    <result column="OLD_BBU_VERSION" jdbcType="VARCHAR" property="oldBbuVersion" />
+    <result column="OLD_SW_VERSION" jdbcType="VARCHAR" property="oldSwVersion" />
+    <result column="SCHEDULE_TIME" jdbcType="VARCHAR" property="scheduleTime" />
+    <result column="SUCCESS_TIME" jdbcType="VARCHAR" property="successTime" />
+    <result column="RETRTIES" jdbcType="TINYINT" property="retrties" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime" />
+    <result column="STATUS_FLAG" jdbcType="TINYINT" property="statusFlag" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, VERSION_ID, SITE_NAME, DEVICE_SN, OLD_VERSION, OLD_FPGA_VERSION, OLD_BBU_VERSION, 
+    OLD_SW_VERSION, SCHEDULE_TIME, SUCCESS_TIME, RETRTIES, CREATE_TIME, UPDATE_TIME, 
+    STATUS_FLAG
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.UpgradeExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_upgrade
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_upgrade
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_upgrade
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.UpgradeExample">
+    delete from t_upgrade
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.Upgrade">
+    insert into t_upgrade (ID, VERSION_ID, SITE_NAME, 
+      DEVICE_SN, OLD_VERSION, OLD_FPGA_VERSION, 
+      OLD_BBU_VERSION, OLD_SW_VERSION, SCHEDULE_TIME, 
+      SUCCESS_TIME, RETRTIES, CREATE_TIME, 
+      UPDATE_TIME, STATUS_FLAG)
+    values (#{id,jdbcType=BIGINT}, #{versionId,jdbcType=BIGINT}, #{siteName,jdbcType=VARCHAR}, 
+      #{deviceSn,jdbcType=VARCHAR}, #{oldVersion,jdbcType=VARCHAR}, #{oldFpgaVersion,jdbcType=VARCHAR}, 
+      #{oldBbuVersion,jdbcType=VARCHAR}, #{oldSwVersion,jdbcType=VARCHAR}, #{scheduleTime,jdbcType=VARCHAR}, 
+      #{successTime,jdbcType=VARCHAR}, #{retrties,jdbcType=TINYINT}, #{createTime,jdbcType=VARCHAR}, 
+      #{updateTime,jdbcType=VARCHAR}, #{statusFlag,jdbcType=TINYINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.Upgrade">
+    insert into t_upgrade
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="versionId != null">
+        VERSION_ID,
+      </if>
+      <if test="siteName != null">
+        SITE_NAME,
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN,
+      </if>
+      <if test="oldVersion != null">
+        OLD_VERSION,
+      </if>
+      <if test="oldFpgaVersion != null">
+        OLD_FPGA_VERSION,
+      </if>
+      <if test="oldBbuVersion != null">
+        OLD_BBU_VERSION,
+      </if>
+      <if test="oldSwVersion != null">
+        OLD_SW_VERSION,
+      </if>
+      <if test="scheduleTime != null">
+        SCHEDULE_TIME,
+      </if>
+      <if test="successTime != null">
+        SUCCESS_TIME,
+      </if>
+      <if test="retrties != null">
+        RETRTIES,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME,
+      </if>
+      <if test="statusFlag != null">
+        STATUS_FLAG,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="versionId != null">
+        #{versionId,jdbcType=BIGINT},
+      </if>
+      <if test="siteName != null">
+        #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="oldVersion != null">
+        #{oldVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="oldFpgaVersion != null">
+        #{oldFpgaVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="oldBbuVersion != null">
+        #{oldBbuVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="oldSwVersion != null">
+        #{oldSwVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="scheduleTime != null">
+        #{scheduleTime,jdbcType=VARCHAR},
+      </if>
+      <if test="successTime != null">
+        #{successTime,jdbcType=VARCHAR},
+      </if>
+      <if test="retrties != null">
+        #{retrties,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="statusFlag != null">
+        #{statusFlag,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.UpgradeExample" resultType="java.lang.Integer">
+    select count(*) from t_upgrade
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_upgrade
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.versionId != null">
+        VERSION_ID = #{record.versionId,jdbcType=BIGINT},
+      </if>
+      <if test="record.siteName != null">
+        SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deviceSn != null">
+        DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="record.oldVersion != null">
+        OLD_VERSION = #{record.oldVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.oldFpgaVersion != null">
+        OLD_FPGA_VERSION = #{record.oldFpgaVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.oldBbuVersion != null">
+        OLD_BBU_VERSION = #{record.oldBbuVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.oldSwVersion != null">
+        OLD_SW_VERSION = #{record.oldSwVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.scheduleTime != null">
+        SCHEDULE_TIME = #{record.scheduleTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.successTime != null">
+        SUCCESS_TIME = #{record.successTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.retrties != null">
+        RETRTIES = #{record.retrties,jdbcType=TINYINT},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.updateTime != null">
+        UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.statusFlag != null">
+        STATUS_FLAG = #{record.statusFlag,jdbcType=TINYINT},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_upgrade
+    set ID = #{record.id,jdbcType=BIGINT},
+      VERSION_ID = #{record.versionId,jdbcType=BIGINT},
+      SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      OLD_VERSION = #{record.oldVersion,jdbcType=VARCHAR},
+      OLD_FPGA_VERSION = #{record.oldFpgaVersion,jdbcType=VARCHAR},
+      OLD_BBU_VERSION = #{record.oldBbuVersion,jdbcType=VARCHAR},
+      OLD_SW_VERSION = #{record.oldSwVersion,jdbcType=VARCHAR},
+      SCHEDULE_TIME = #{record.scheduleTime,jdbcType=VARCHAR},
+      SUCCESS_TIME = #{record.successTime,jdbcType=VARCHAR},
+      RETRTIES = #{record.retrties,jdbcType=TINYINT},
+      CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      STATUS_FLAG = #{record.statusFlag,jdbcType=TINYINT}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.Upgrade">
+    update t_upgrade
+    <set>
+      <if test="versionId != null">
+        VERSION_ID = #{versionId,jdbcType=BIGINT},
+      </if>
+      <if test="siteName != null">
+        SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="oldVersion != null">
+        OLD_VERSION = #{oldVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="oldFpgaVersion != null">
+        OLD_FPGA_VERSION = #{oldFpgaVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="oldBbuVersion != null">
+        OLD_BBU_VERSION = #{oldBbuVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="oldSwVersion != null">
+        OLD_SW_VERSION = #{oldSwVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="scheduleTime != null">
+        SCHEDULE_TIME = #{scheduleTime,jdbcType=VARCHAR},
+      </if>
+      <if test="successTime != null">
+        SUCCESS_TIME = #{successTime,jdbcType=VARCHAR},
+      </if>
+      <if test="retrties != null">
+        RETRTIES = #{retrties,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="statusFlag != null">
+        STATUS_FLAG = #{statusFlag,jdbcType=TINYINT},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.Upgrade">
+    update t_upgrade
+    set VERSION_ID = #{versionId,jdbcType=BIGINT},
+      SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      OLD_VERSION = #{oldVersion,jdbcType=VARCHAR},
+      OLD_FPGA_VERSION = #{oldFpgaVersion,jdbcType=VARCHAR},
+      OLD_BBU_VERSION = #{oldBbuVersion,jdbcType=VARCHAR},
+      OLD_SW_VERSION = #{oldSwVersion,jdbcType=VARCHAR},
+      SCHEDULE_TIME = #{scheduleTime,jdbcType=VARCHAR},
+      SUCCESS_TIME = #{successTime,jdbcType=VARCHAR},
+      RETRTIES = #{retrties,jdbcType=TINYINT},
+      CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      STATUS_FLAG = #{statusFlag,jdbcType=TINYINT}
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <resultMap id="BaseResultMap" type="com.iekun.ef.model.Upgrade">
+    <id column="ID" jdbcType="INTEGER" property="id" />
+    <result column="DEVICE_VERSION_ID" jdbcType="INTEGER" property="deviceVersionId" />
+    <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+    <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+    <result column="ORIGIN_VERSION" jdbcType="VARCHAR" property="originVersion" />
+    <result column="ORIGIN_FPGA_VERSION" jdbcType="VARCHAR" property="originFpgaVersion" />
+    <result column="ORIGIN_BBU_VERSION" jdbcType="VARCHAR" property="originBbuVersion" />
+    <result column="ORIGIN_SW_VERSION" jdbcType="VARCHAR" property="originSwVersion" />
+    <result column="SCHEDULE_TIME" jdbcType="VARCHAR" property="scheduleTime" />
+    <result column="SUCCESS_TIME" jdbcType="VARCHAR" property="successTime" />
+    <result column="RETRTIES" jdbcType="TINYINT" property="retrties" />
+    <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+    <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime" />
+    <result column="STATUS_FLAG" jdbcType="TINYINT" property="statusFlag" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, DEVICE_VERSION_ID, SITE_NAME, DEVICE_SN, ORIGIN_VERSION, ORIGIN_FPGA_VERSION, 
+    ORIGIN_BBU_VERSION, ORIGIN_SW_VERSION, SCHEDULE_TIME, SUCCESS_TIME, RETRTIES, CREATE_TIME, 
+    UPDATE_TIME, STATUS_FLAG
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.UpgradeExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_upgrade
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Integer" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_upgrade
+    where ID = #{id,jdbcType=INTEGER}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
+    delete from t_upgrade
+    where ID = #{id,jdbcType=INTEGER}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.UpgradeExample">
+    delete from t_upgrade
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.Upgrade">
+    insert into t_upgrade (ID, DEVICE_VERSION_ID, SITE_NAME, 
+      DEVICE_SN, ORIGIN_VERSION, ORIGIN_FPGA_VERSION, 
+      ORIGIN_BBU_VERSION, ORIGIN_SW_VERSION, SCHEDULE_TIME, 
+      SUCCESS_TIME, RETRTIES, CREATE_TIME, 
+      UPDATE_TIME, STATUS_FLAG)
+    values (#{id,jdbcType=INTEGER}, #{deviceVersionId,jdbcType=INTEGER}, #{siteName,jdbcType=VARCHAR}, 
+      #{deviceSn,jdbcType=VARCHAR}, #{originVersion,jdbcType=VARCHAR}, #{originFpgaVersion,jdbcType=VARCHAR}, 
+      #{originBbuVersion,jdbcType=VARCHAR}, #{originSwVersion,jdbcType=VARCHAR}, #{scheduleTime,jdbcType=VARCHAR}, 
+      #{successTime,jdbcType=VARCHAR}, #{retrties,jdbcType=TINYINT}, #{createTime,jdbcType=VARCHAR}, 
+      #{updateTime,jdbcType=VARCHAR}, #{statusFlag,jdbcType=TINYINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.Upgrade">
+    insert into t_upgrade
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="deviceVersionId != null">
+        DEVICE_VERSION_ID,
+      </if>
+      <if test="siteName != null">
+        SITE_NAME,
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN,
+      </if>
+      <if test="originVersion != null">
+        ORIGIN_VERSION,
+      </if>
+      <if test="originFpgaVersion != null">
+        ORIGIN_FPGA_VERSION,
+      </if>
+      <if test="originBbuVersion != null">
+        ORIGIN_BBU_VERSION,
+      </if>
+      <if test="originSwVersion != null">
+        ORIGIN_SW_VERSION,
+      </if>
+      <if test="scheduleTime != null">
+        SCHEDULE_TIME,
+      </if>
+      <if test="successTime != null">
+        SUCCESS_TIME,
+      </if>
+      <if test="retrties != null">
+        RETRTIES,
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME,
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME,
+      </if>
+      <if test="statusFlag != null">
+        STATUS_FLAG,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=INTEGER},
+      </if>
+      <if test="deviceVersionId != null">
+        #{deviceVersionId,jdbcType=INTEGER},
+      </if>
+      <if test="siteName != null">
+        #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="originVersion != null">
+        #{originVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="originFpgaVersion != null">
+        #{originFpgaVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="originBbuVersion != null">
+        #{originBbuVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="originSwVersion != null">
+        #{originSwVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="scheduleTime != null">
+        #{scheduleTime,jdbcType=VARCHAR},
+      </if>
+      <if test="successTime != null">
+        #{successTime,jdbcType=VARCHAR},
+      </if>
+      <if test="retrties != null">
+        #{retrties,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="statusFlag != null">
+        #{statusFlag,jdbcType=TINYINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.UpgradeExample" resultType="java.lang.Integer">
+    select count(*) from t_upgrade
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_upgrade
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=INTEGER},
+      </if>
+      <if test="record.deviceVersionId != null">
+        DEVICE_VERSION_ID = #{record.deviceVersionId,jdbcType=INTEGER},
+      </if>
+      <if test="record.siteName != null">
+        SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deviceSn != null">
+        DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="record.originVersion != null">
+        ORIGIN_VERSION = #{record.originVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.originFpgaVersion != null">
+        ORIGIN_FPGA_VERSION = #{record.originFpgaVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.originBbuVersion != null">
+        ORIGIN_BBU_VERSION = #{record.originBbuVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.originSwVersion != null">
+        ORIGIN_SW_VERSION = #{record.originSwVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="record.scheduleTime != null">
+        SCHEDULE_TIME = #{record.scheduleTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.successTime != null">
+        SUCCESS_TIME = #{record.successTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.retrties != null">
+        RETRTIES = #{record.retrties,jdbcType=TINYINT},
+      </if>
+      <if test="record.createTime != null">
+        CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.updateTime != null">
+        UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.statusFlag != null">
+        STATUS_FLAG = #{record.statusFlag,jdbcType=TINYINT},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_upgrade
+    set ID = #{record.id,jdbcType=INTEGER},
+      DEVICE_VERSION_ID = #{record.deviceVersionId,jdbcType=INTEGER},
+      SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      ORIGIN_VERSION = #{record.originVersion,jdbcType=VARCHAR},
+      ORIGIN_FPGA_VERSION = #{record.originFpgaVersion,jdbcType=VARCHAR},
+      ORIGIN_BBU_VERSION = #{record.originBbuVersion,jdbcType=VARCHAR},
+      ORIGIN_SW_VERSION = #{record.originSwVersion,jdbcType=VARCHAR},
+      SCHEDULE_TIME = #{record.scheduleTime,jdbcType=VARCHAR},
+      SUCCESS_TIME = #{record.successTime,jdbcType=VARCHAR},
+      RETRTIES = #{record.retrties,jdbcType=TINYINT},
+      CREATE_TIME = #{record.createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{record.updateTime,jdbcType=VARCHAR},
+      STATUS_FLAG = #{record.statusFlag,jdbcType=TINYINT}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.Upgrade">
+    update t_upgrade
+    <set>
+      <if test="deviceVersionId != null">
+        DEVICE_VERSION_ID = #{deviceVersionId,jdbcType=INTEGER},
+      </if>
+      <if test="siteName != null">
+        SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="originVersion != null">
+        ORIGIN_VERSION = #{originVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="originFpgaVersion != null">
+        ORIGIN_FPGA_VERSION = #{originFpgaVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="originBbuVersion != null">
+        ORIGIN_BBU_VERSION = #{originBbuVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="originSwVersion != null">
+        ORIGIN_SW_VERSION = #{originSwVersion,jdbcType=VARCHAR},
+      </if>
+      <if test="scheduleTime != null">
+        SCHEDULE_TIME = #{scheduleTime,jdbcType=VARCHAR},
+      </if>
+      <if test="successTime != null">
+        SUCCESS_TIME = #{successTime,jdbcType=VARCHAR},
+      </if>
+      <if test="retrties != null">
+        RETRTIES = #{retrties,jdbcType=TINYINT},
+      </if>
+      <if test="createTime != null">
+        CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      </if>
+      <if test="updateTime != null">
+        UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      </if>
+      <if test="statusFlag != null">
+        STATUS_FLAG = #{statusFlag,jdbcType=TINYINT},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=INTEGER}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.Upgrade">
+    update t_upgrade
+    set DEVICE_VERSION_ID = #{deviceVersionId,jdbcType=INTEGER},
+      SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      ORIGIN_VERSION = #{originVersion,jdbcType=VARCHAR},
+      ORIGIN_FPGA_VERSION = #{originFpgaVersion,jdbcType=VARCHAR},
+      ORIGIN_BBU_VERSION = #{originBbuVersion,jdbcType=VARCHAR},
+      ORIGIN_SW_VERSION = #{originSwVersion,jdbcType=VARCHAR},
+      SCHEDULE_TIME = #{scheduleTime,jdbcType=VARCHAR},
+      SUCCESS_TIME = #{successTime,jdbcType=VARCHAR},
+      RETRTIES = #{retrties,jdbcType=TINYINT},
+      CREATE_TIME = #{createTime,jdbcType=VARCHAR},
+      UPDATE_TIME = #{updateTime,jdbcType=VARCHAR},
+      STATUS_FLAG = #{statusFlag,jdbcType=TINYINT}
+    where ID = #{id,jdbcType=INTEGER}
+  </update> -->
+</mapper>

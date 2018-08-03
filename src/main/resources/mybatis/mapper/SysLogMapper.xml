@@ -1,0 +1,998 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.SysLogMapper">
+  <resultMap  type="com.iekun.ef.model.SysLog" id="BaseResultMap">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="TYPE" jdbcType="TINYINT" property="type" />
+    <result column="USER_ID" jdbcType="BIGINT" property="userId" />
+    <result column="OPER_CODE" jdbcType="VARCHAR" property="operCode" />
+    <result column="OPER_NAME" jdbcType="VARCHAR" property="operName" />
+    <result column="OPER_TIME" jdbcType="VARCHAR" property="operTime" />
+    <result column="OPER_STATUS" jdbcType="TINYINT" property="operStatus" />
+    <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+    <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+    <result column="SESSION_ID" jdbcType="BIGINT" property="sessionId" />
+    <result column="USER_NAME" jdbcType="BIGINT" property="userName" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, TYPE, USER_ID, OPER_CODE, OPER_NAME, OPER_TIME, OPER_STATUS, SITE_NAME, DEVICE_SN, 
+    SESSION_ID
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.SysLogExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_sys_log
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_sys_log
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  
+ <select id="selectLogList" parameterType="java.util.Map"  resultMap="BaseResultMap">
+    select 
+     	TLG.ID,
+     	TLG.TYPE,
+     	TLG.OPER_NAME,
+       	TLG.OPER_TIME,
+       	TLG.DEVICE_SN,
+      	TU.USER_NAME
+    from t_sys_log TLG
+       	left join t_user TU on TU.ID = TLG.USER_ID
+    where 1=1
+    <if test="type != null">  
+     AND TLG.TYPE = #{type}  
+    </if> 
+    <if test="owerId != null">  
+     AND TLG.USER_ID = #{owerId}  
+    </if>
+     <if test="userName != null">  
+     AND TU.LOGIN_NAME = #{userName}  
+    </if>
+    <if test="deviceSn != null">  
+     AND TLG.DEVICE_SN = #{deviceSn}  
+    </if>
+    <if test="startDate != null">  
+      AND TLG.OPER_TIME > #{startDate} AND  #{endDate} > TLG.OPER_TIME
+    </if>  
+    <if test="start != null and length != null"> 
+      order by TLG.OPER_TIME ASC
+      limit #{start}, #{length}
+    </if>
+  </select>
+  
+  <select id="getLoggerCnt" parameterType="java.util.Map" resultType="java.lang.Long">
+    select 
+    count(1)
+    from (select 
+     	TLG.ID,
+     	TLG.TYPE,
+     	TLG.OPER_NAME,
+       	TLG.OPER_TIME,
+      	TU.USER_NAME
+    from t_sys_log TLG
+       	left join t_user TU on TU.ID = TLG.USER_ID
+    where 1=1
+    <if test="type != null">  
+     AND TLG.TYPE = #{type}  
+    </if> 
+    <if test="owerId != null">  
+     AND TLG.USER_ID = #{owerId}  
+    </if>
+    <if test="userName != null">  
+     AND TU.LOGIN_NAME = #{userName}  
+    </if>
+    <if test="deviceSn != null">  
+     AND TLG.DEVICE_SN = #{deviceSn}  
+    </if> 
+    <if test="startDate != null">  
+      AND TLG.OPER_TIME > #{startDate} AND  #{endDate} > TLG.OPER_TIME
+    </if>  
+    ) as tu_tlg
+    where 1=1
+    </select>
+  
+    
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_sys_log
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.SysLogExample">
+    delete from t_sys_log
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.SysLog">
+    insert into t_sys_log (ID, TYPE, USER_ID, 
+      OPER_CODE, OPER_NAME, OPER_TIME, 
+      OPER_STATUS, SITE_NAME, DEVICE_SN, 
+      SESSION_ID)
+    values (#{id,jdbcType=BIGINT}, #{type,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT}, 
+      #{operCode,jdbcType=VARCHAR}, #{operName,jdbcType=VARCHAR}, #{operTime,jdbcType=VARCHAR}, 
+      #{operStatus,jdbcType=TINYINT}, #{siteName,jdbcType=VARCHAR}, #{deviceSn,jdbcType=VARCHAR}, 
+      #{sessionId,jdbcType=BIGINT})
+  </insert>
+  
+   <insert id="insertLog" parameterType="java.util.Map">
+    insert into t_sys_log (TYPE, USER_ID, 
+      OPER_CODE, OPER_NAME, OPER_TIME, 
+      OPER_STATUS, SITE_NAME, DEVICE_SN, 
+      SESSION_ID)
+    values (#{type}, #{userId}, 
+      #{operCode}, #{operName}, #{operTime}, 
+      #{operStatus}, #{siteName}, #{deviceSn}, 
+      #{sessionId})
+  </insert>
+  
+  
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.SysLog">
+    insert into t_sys_log
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="type != null">
+        TYPE,
+      </if>
+      <if test="userId != null">
+        USER_ID,
+      </if>
+      <if test="operCode != null">
+        OPER_CODE,
+      </if>
+      <if test="operName != null">
+        OPER_NAME,
+      </if>
+      <if test="operTime != null">
+        OPER_TIME,
+      </if>
+      <if test="operStatus != null">
+        OPER_STATUS,
+      </if>
+      <if test="siteName != null">
+        SITE_NAME,
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN,
+      </if>
+      <if test="sessionId != null">
+        SESSION_ID,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=TINYINT},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="operCode != null">
+        #{operCode,jdbcType=VARCHAR},
+      </if>
+      <if test="operName != null">
+        #{operName,jdbcType=VARCHAR},
+      </if>
+      <if test="operTime != null">
+        #{operTime,jdbcType=VARCHAR},
+      </if>
+      <if test="operStatus != null">
+        #{operStatus,jdbcType=TINYINT},
+      </if>
+      <if test="siteName != null">
+        #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="sessionId != null">
+        #{sessionId,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.SysLogExample" resultType="java.lang.Integer">
+    select count(*) from t_sys_log
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_sys_log
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.type != null">
+        TYPE = #{record.type,jdbcType=TINYINT},
+      </if>
+      <if test="record.userId != null">
+        USER_ID = #{record.userId,jdbcType=BIGINT},
+      </if>
+      <if test="record.operCode != null">
+        OPER_CODE = #{record.operCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operName != null">
+        OPER_NAME = #{record.operName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operTime != null">
+        OPER_TIME = #{record.operTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operStatus != null">
+        OPER_STATUS = #{record.operStatus,jdbcType=TINYINT},
+      </if>
+      <if test="record.siteName != null">
+        SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deviceSn != null">
+        DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="record.sessionId != null">
+        SESSION_ID = #{record.sessionId,jdbcType=BIGINT},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_sys_log
+    set ID = #{record.id,jdbcType=BIGINT},
+      TYPE = #{record.type,jdbcType=TINYINT},
+      USER_ID = #{record.userId,jdbcType=BIGINT},
+      OPER_CODE = #{record.operCode,jdbcType=VARCHAR},
+      OPER_NAME = #{record.operName,jdbcType=VARCHAR},
+      OPER_TIME = #{record.operTime,jdbcType=VARCHAR},
+      OPER_STATUS = #{record.operStatus,jdbcType=TINYINT},
+      SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      SESSION_ID = #{record.sessionId,jdbcType=BIGINT}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.SysLog">
+    update t_sys_log
+    <set>
+      <if test="type != null">
+        TYPE = #{type,jdbcType=TINYINT},
+      </if>
+      <if test="userId != null">
+        USER_ID = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="operCode != null">
+        OPER_CODE = #{operCode,jdbcType=VARCHAR},
+      </if>
+      <if test="operName != null">
+        OPER_NAME = #{operName,jdbcType=VARCHAR},
+      </if>
+      <if test="operTime != null">
+        OPER_TIME = #{operTime,jdbcType=VARCHAR},
+      </if>
+      <if test="operStatus != null">
+        OPER_STATUS = #{operStatus,jdbcType=TINYINT},
+      </if>
+      <if test="siteName != null">
+        SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="sessionId != null">
+        SESSION_ID = #{sessionId,jdbcType=BIGINT},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.SysLog">
+    update t_sys_log
+    set TYPE = #{type,jdbcType=TINYINT},
+      USER_ID = #{userId,jdbcType=BIGINT},
+      OPER_CODE = #{operCode,jdbcType=VARCHAR},
+      OPER_NAME = #{operName,jdbcType=VARCHAR},
+      OPER_TIME = #{operTime,jdbcType=VARCHAR},
+      OPER_STATUS = #{operStatus,jdbcType=TINYINT},
+      SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      SESSION_ID = #{sessionId,jdbcType=BIGINT}
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+
+  <insert id="insertDownloadLog" parameterType="java.util.Map">
+    INSERT INTO
+    t_device_download_log (DEVICESN,STATUS,TIMESTAMP)
+    VALUES
+    (#{deviceSn},#{status},#{timeStamp})
+  </insert>
+
+  <update id="updateDownloadLog" parameterType="java.util.Map">
+    UPDATE
+        t_device_download_log
+    SET
+        status = #{status}
+    WHERE
+        DEVICESN = #{deviceSn}
+  </update>
+
+  <select id="exportLog" parameterType="java.lang.String" resultType="java.util.Map">
+    SELECT
+      ID,DEVICESN,STATUS,TIMESTAMP
+    from
+      t_device_download_log
+    WHERE
+      DEVICESN = #{deviceSn}
+  </select>
+
+  <delete id="deleteDownloadLogTaskByDeviceSn" parameterType="java.lang.String">
+    DELETE FROM t_device_download_log
+    where DEVICESN = #{deviceSn}
+  </delete>
+  <!-- <resultMap id="BaseResultMap" type="com.iekun.ef.model.SysLog">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="TYPE" jdbcType="TINYINT" property="type" />
+    <result column="USER_ID" jdbcType="BIGINT" property="userId" />
+    <result column="OPER_CODE" jdbcType="VARCHAR" property="operCode" />
+    <result column="OPER_NAME" jdbcType="VARCHAR" property="operName" />
+    <result column="OPER_TIME" jdbcType="VARCHAR" property="operTime" />
+    <result column="OPER_STATUS" jdbcType="TINYINT" property="operStatus" />
+    <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+    <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+    <result column="SESSION_ID" jdbcType="BIGINT" property="sessionId" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, TYPE, USER_ID, OPER_CODE, OPER_NAME, OPER_TIME, OPER_STATUS, SITE_NAME, DEVICE_SN, 
+    SESSION_ID
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.SysLogExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_sys_log
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_sys_log
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_sys_log
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.SysLogExample">
+    delete from t_sys_log
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.SysLog">
+    insert into t_sys_log (ID, TYPE, USER_ID, 
+      OPER_CODE, OPER_NAME, OPER_TIME, 
+      OPER_STATUS, SITE_NAME, DEVICE_SN, 
+      SESSION_ID)
+    values (#{id,jdbcType=BIGINT}, #{type,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT}, 
+      #{operCode,jdbcType=VARCHAR}, #{operName,jdbcType=VARCHAR}, #{operTime,jdbcType=VARCHAR}, 
+      #{operStatus,jdbcType=TINYINT}, #{siteName,jdbcType=VARCHAR}, #{deviceSn,jdbcType=VARCHAR}, 
+      #{sessionId,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.SysLog">
+    insert into t_sys_log
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="type != null">
+        TYPE,
+      </if>
+      <if test="userId != null">
+        USER_ID,
+      </if>
+      <if test="operCode != null">
+        OPER_CODE,
+      </if>
+      <if test="operName != null">
+        OPER_NAME,
+      </if>
+      <if test="operTime != null">
+        OPER_TIME,
+      </if>
+      <if test="operStatus != null">
+        OPER_STATUS,
+      </if>
+      <if test="siteName != null">
+        SITE_NAME,
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN,
+      </if>
+      <if test="sessionId != null">
+        SESSION_ID,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=TINYINT},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="operCode != null">
+        #{operCode,jdbcType=VARCHAR},
+      </if>
+      <if test="operName != null">
+        #{operName,jdbcType=VARCHAR},
+      </if>
+      <if test="operTime != null">
+        #{operTime,jdbcType=VARCHAR},
+      </if>
+      <if test="operStatus != null">
+        #{operStatus,jdbcType=TINYINT},
+      </if>
+      <if test="siteName != null">
+        #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="sessionId != null">
+        #{sessionId,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.SysLogExample" resultType="java.lang.Integer">
+    select count(*) from t_sys_log
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_sys_log
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.type != null">
+        TYPE = #{record.type,jdbcType=TINYINT},
+      </if>
+      <if test="record.userId != null">
+        USER_ID = #{record.userId,jdbcType=BIGINT},
+      </if>
+      <if test="record.operCode != null">
+        OPER_CODE = #{record.operCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operName != null">
+        OPER_NAME = #{record.operName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operTime != null">
+        OPER_TIME = #{record.operTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operStatus != null">
+        OPER_STATUS = #{record.operStatus,jdbcType=TINYINT},
+      </if>
+      <if test="record.siteName != null">
+        SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deviceSn != null">
+        DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="record.sessionId != null">
+        SESSION_ID = #{record.sessionId,jdbcType=BIGINT},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_sys_log
+    set ID = #{record.id,jdbcType=BIGINT},
+      TYPE = #{record.type,jdbcType=TINYINT},
+      USER_ID = #{record.userId,jdbcType=BIGINT},
+      OPER_CODE = #{record.operCode,jdbcType=VARCHAR},
+      OPER_NAME = #{record.operName,jdbcType=VARCHAR},
+      OPER_TIME = #{record.operTime,jdbcType=VARCHAR},
+      OPER_STATUS = #{record.operStatus,jdbcType=TINYINT},
+      SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      SESSION_ID = #{record.sessionId,jdbcType=BIGINT}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.SysLog">
+    update t_sys_log
+    <set>
+      <if test="type != null">
+        TYPE = #{type,jdbcType=TINYINT},
+      </if>
+      <if test="userId != null">
+        USER_ID = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="operCode != null">
+        OPER_CODE = #{operCode,jdbcType=VARCHAR},
+      </if>
+      <if test="operName != null">
+        OPER_NAME = #{operName,jdbcType=VARCHAR},
+      </if>
+      <if test="operTime != null">
+        OPER_TIME = #{operTime,jdbcType=VARCHAR},
+      </if>
+      <if test="operStatus != null">
+        OPER_STATUS = #{operStatus,jdbcType=TINYINT},
+      </if>
+      <if test="siteName != null">
+        SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="sessionId != null">
+        SESSION_ID = #{sessionId,jdbcType=BIGINT},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.SysLog">
+    update t_sys_log
+    set TYPE = #{type,jdbcType=TINYINT},
+      USER_ID = #{userId,jdbcType=BIGINT},
+      OPER_CODE = #{operCode,jdbcType=VARCHAR},
+      OPER_NAME = #{operName,jdbcType=VARCHAR},
+      OPER_TIME = #{operTime,jdbcType=VARCHAR},
+      OPER_STATUS = #{operStatus,jdbcType=TINYINT},
+      SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      SESSION_ID = #{sessionId,jdbcType=BIGINT}
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <resultMap id="BaseResultMap" type="com.iekun.ef.model.SysLog">
+    <id column="ID" jdbcType="BIGINT" property="id" />
+    <result column="TYPE" jdbcType="TINYINT" property="type" />
+    <result column="USER_ID" jdbcType="BIGINT" property="userId" />
+    <result column="OPER_CODE" jdbcType="VARCHAR" property="operCode" />
+    <result column="OPER_NAME" jdbcType="VARCHAR" property="operName" />
+    <result column="OPER_TIME" jdbcType="VARCHAR" property="operTime" />
+    <result column="OPER_STATUS" jdbcType="TINYINT" property="operStatus" />
+    <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+    <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+    <result column="SESSION_ID" jdbcType="BIGINT" property="sessionId" />
+  </resultMap>
+  <sql id="Example_Where_Clause">
+    <where>
+      <foreach collection="oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Update_By_Example_Where_Clause">
+    <where>
+      <foreach collection="example.oredCriteria" item="criteria" separator="or">
+        <if test="criteria.valid">
+          <trim prefix="(" prefixOverrides="and" suffix=")">
+            <foreach collection="criteria.criteria" item="criterion">
+              <choose>
+                <when test="criterion.noValue">
+                  and ${criterion.condition}
+                </when>
+                <when test="criterion.singleValue">
+                  and ${criterion.condition} #{criterion.value}
+                </when>
+                <when test="criterion.betweenValue">
+                  and ${criterion.condition} #{criterion.value} and #{criterion.secondValue}
+                </when>
+                <when test="criterion.listValue">
+                  and ${criterion.condition}
+                  <foreach close=")" collection="criterion.value" item="listItem" open="(" separator=",">
+                    #{listItem}
+                  </foreach>
+                </when>
+              </choose>
+            </foreach>
+          </trim>
+        </if>
+      </foreach>
+    </where>
+  </sql>
+  <sql id="Base_Column_List">
+    ID, TYPE, USER_ID, OPER_CODE, OPER_NAME, OPER_TIME, OPER_STATUS, SITE_NAME, DEVICE_SN, 
+    SESSION_ID
+  </sql>
+  <select id="selectByExample" parameterType="com.iekun.ef.model.SysLogExample" resultMap="BaseResultMap">
+    select
+    <if test="distinct">
+      distinct
+    </if>
+    <include refid="Base_Column_List" />
+    from t_sys_log
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+    <if test="orderByClause != null">
+      order by ${orderByClause}
+    </if>
+    <if test="limit != null">
+      <if test="offset != null">
+        limit ${offset}, ${limit}
+      </if>
+      <if test="offset == null">
+        limit ${limit}
+      </if>
+    </if>
+  </select>
+  <select id="selectByPrimaryKey" parameterType="java.lang.Long" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_sys_log
+    where ID = #{id,jdbcType=BIGINT}
+  </select>
+  <delete id="deleteByPrimaryKey" parameterType="java.lang.Long">
+    delete from t_sys_log
+    where ID = #{id,jdbcType=BIGINT}
+  </delete>
+  <delete id="deleteByExample" parameterType="com.iekun.ef.model.SysLogExample">
+    delete from t_sys_log
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </delete>
+  <insert id="insert" parameterType="com.iekun.ef.model.SysLog">
+    insert into t_sys_log (ID, TYPE, USER_ID, 
+      OPER_CODE, OPER_NAME, OPER_TIME, 
+      OPER_STATUS, SITE_NAME, DEVICE_SN, 
+      SESSION_ID)
+    values (#{id,jdbcType=BIGINT}, #{type,jdbcType=TINYINT}, #{userId,jdbcType=BIGINT}, 
+      #{operCode,jdbcType=VARCHAR}, #{operName,jdbcType=VARCHAR}, #{operTime,jdbcType=VARCHAR}, 
+      #{operStatus,jdbcType=TINYINT}, #{siteName,jdbcType=VARCHAR}, #{deviceSn,jdbcType=VARCHAR}, 
+      #{sessionId,jdbcType=BIGINT})
+  </insert>
+  <insert id="insertSelective" parameterType="com.iekun.ef.model.SysLog">
+    insert into t_sys_log
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        ID,
+      </if>
+      <if test="type != null">
+        TYPE,
+      </if>
+      <if test="userId != null">
+        USER_ID,
+      </if>
+      <if test="operCode != null">
+        OPER_CODE,
+      </if>
+      <if test="operName != null">
+        OPER_NAME,
+      </if>
+      <if test="operTime != null">
+        OPER_TIME,
+      </if>
+      <if test="operStatus != null">
+        OPER_STATUS,
+      </if>
+      <if test="siteName != null">
+        SITE_NAME,
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN,
+      </if>
+      <if test="sessionId != null">
+        SESSION_ID,
+      </if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="id != null">
+        #{id,jdbcType=BIGINT},
+      </if>
+      <if test="type != null">
+        #{type,jdbcType=TINYINT},
+      </if>
+      <if test="userId != null">
+        #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="operCode != null">
+        #{operCode,jdbcType=VARCHAR},
+      </if>
+      <if test="operName != null">
+        #{operName,jdbcType=VARCHAR},
+      </if>
+      <if test="operTime != null">
+        #{operTime,jdbcType=VARCHAR},
+      </if>
+      <if test="operStatus != null">
+        #{operStatus,jdbcType=TINYINT},
+      </if>
+      <if test="siteName != null">
+        #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="sessionId != null">
+        #{sessionId,jdbcType=BIGINT},
+      </if>
+    </trim>
+  </insert>
+  <select id="countByExample" parameterType="com.iekun.ef.model.SysLogExample" resultType="java.lang.Integer">
+    select count(*) from t_sys_log
+    <if test="_parameter != null">
+      <include refid="Example_Where_Clause" />
+    </if>
+  </select>
+  <update id="updateByExampleSelective" parameterType="map">
+    update t_sys_log
+    <set>
+      <if test="record.id != null">
+        ID = #{record.id,jdbcType=BIGINT},
+      </if>
+      <if test="record.type != null">
+        TYPE = #{record.type,jdbcType=TINYINT},
+      </if>
+      <if test="record.userId != null">
+        USER_ID = #{record.userId,jdbcType=BIGINT},
+      </if>
+      <if test="record.operCode != null">
+        OPER_CODE = #{record.operCode,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operName != null">
+        OPER_NAME = #{record.operName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operTime != null">
+        OPER_TIME = #{record.operTime,jdbcType=VARCHAR},
+      </if>
+      <if test="record.operStatus != null">
+        OPER_STATUS = #{record.operStatus,jdbcType=TINYINT},
+      </if>
+      <if test="record.siteName != null">
+        SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="record.deviceSn != null">
+        DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="record.sessionId != null">
+        SESSION_ID = #{record.sessionId,jdbcType=BIGINT},
+      </if>
+    </set>
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByExample" parameterType="map">
+    update t_sys_log
+    set ID = #{record.id,jdbcType=BIGINT},
+      TYPE = #{record.type,jdbcType=TINYINT},
+      USER_ID = #{record.userId,jdbcType=BIGINT},
+      OPER_CODE = #{record.operCode,jdbcType=VARCHAR},
+      OPER_NAME = #{record.operName,jdbcType=VARCHAR},
+      OPER_TIME = #{record.operTime,jdbcType=VARCHAR},
+      OPER_STATUS = #{record.operStatus,jdbcType=TINYINT},
+      SITE_NAME = #{record.siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{record.deviceSn,jdbcType=VARCHAR},
+      SESSION_ID = #{record.sessionId,jdbcType=BIGINT}
+    <if test="_parameter != null">
+      <include refid="Update_By_Example_Where_Clause" />
+    </if>
+  </update>
+  <update id="updateByPrimaryKeySelective" parameterType="com.iekun.ef.model.SysLog">
+    update t_sys_log
+    <set>
+      <if test="type != null">
+        TYPE = #{type,jdbcType=TINYINT},
+      </if>
+      <if test="userId != null">
+        USER_ID = #{userId,jdbcType=BIGINT},
+      </if>
+      <if test="operCode != null">
+        OPER_CODE = #{operCode,jdbcType=VARCHAR},
+      </if>
+      <if test="operName != null">
+        OPER_NAME = #{operName,jdbcType=VARCHAR},
+      </if>
+      <if test="operTime != null">
+        OPER_TIME = #{operTime,jdbcType=VARCHAR},
+      </if>
+      <if test="operStatus != null">
+        OPER_STATUS = #{operStatus,jdbcType=TINYINT},
+      </if>
+      <if test="siteName != null">
+        SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      </if>
+      <if test="deviceSn != null">
+        DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      </if>
+      <if test="sessionId != null">
+        SESSION_ID = #{sessionId,jdbcType=BIGINT},
+      </if>
+    </set>
+    where ID = #{id,jdbcType=BIGINT}
+  </update>
+  <update id="updateByPrimaryKey" parameterType="com.iekun.ef.model.SysLog">
+    update t_sys_log
+    set TYPE = #{type,jdbcType=TINYINT},
+      USER_ID = #{userId,jdbcType=BIGINT},
+      OPER_CODE = #{operCode,jdbcType=VARCHAR},
+      OPER_NAME = #{operName,jdbcType=VARCHAR},
+      OPER_TIME = #{operTime,jdbcType=VARCHAR},
+      OPER_STATUS = #{operStatus,jdbcType=TINYINT},
+      SITE_NAME = #{siteName,jdbcType=VARCHAR},
+      DEVICE_SN = #{deviceSn,jdbcType=VARCHAR},
+      SESSION_ID = #{sessionId,jdbcType=BIGINT}
+    where ID = #{id,jdbcType=BIGINT}
+  </update> -->
+</mapper>

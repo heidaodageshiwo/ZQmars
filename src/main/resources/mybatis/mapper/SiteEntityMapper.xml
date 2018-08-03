@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.SiteEntityMapper">
+    <resultMap id="baseResultMap" type="com.iekun.ef.model.SiteEntity">
+        <id column="ID" jdbcType="BIGINT" property="id" />
+        <result column="SN" jdbcType="VARCHAR" property="sn" />
+        <result column="NAME" jdbcType="VARCHAR" property="name" />
+        <result column="LONGITUDE" jdbcType="VARCHAR" property="longitude" />
+        <result column="LATITUDE" jdbcType="VARCHAR" property="latitude" />
+        <result column="ADDRESS" jdbcType="VARCHAR" property="address" />
+        <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+        <result column="DELETE_FLAG" jdbcType="BIT" property="deleteFlag" />
+        <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+        <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime" />
+        <result column="CITY_CODE" jdbcType="VARCHAR" property="cityCode" />
+        <result column="ZIP_CODE" jdbcType="VARCHAR" property="zipCode" />
+        <result column="PROVINCE_ID" jdbcType="BIGINT" property="province_id" />
+        <result column="CITY_ID" jdbcType="BIGINT" property="city_id" />
+        <result column="TOWN_ID" jdbcType="BIGINT" property="town_id" />
+        <result column="PROVINCE_NAME" jdbcType="VARCHAR" property="province_name" />
+        <result column="CITY_NAME" jdbcType="VARCHAR" property="city_name" />
+        <result column="TOWN_NAME" jdbcType="VARCHAR" property="town_name" />
+        <result column="LC" jdbcType="VARCHAR" property="lc" />
+        <result column="CI" jdbcType="VARCHAR" property="ci" />
+        <collection property="deviceEntityList" ofType="com.iekun.ef.model.DeviceEntity" column="SITE_ID">
+            <id column="ID" jdbcType="BIGINT" property="id" />
+            <result column="SITE_ID" jdbcType="BIGINT" property="siteId" />
+            <result column="SN" jdbcType="VARCHAR" property="sn" />
+            <result column="NAME" jdbcType="VARCHAR" property="name" />
+            <result column="TYPE" jdbcType="TINYINT" property="type" />
+            <result column="BAND" jdbcType="VARCHAR" property="band" />
+            <result column="OPERATOR" jdbcType="VARCHAR" property="operator" />
+            <result column="MANUFACTURER" jdbcType="VARCHAR" property="manufacturer" />
+            <result column="REMARK" jdbcType="VARCHAR" property="remark" />
+            <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+            <result column="UPDATE_TIME" jdbcType="VARCHAR" property="updateTime" />
+            <result column="DELETE_FLAG" jdbcType="BIT" property="deleteFlag" />
+        </collection>
+    </resultMap>
+
+    <sql id="siteWithDeviceColumns">
+        s.ID,
+        s.SN,
+        s.NAME,
+        s.LONGITUDE,
+        s.LATITUDE,
+        s.ADDRESS,
+        s.REMARK,
+        s.DELETE_FLAG,
+        s.CREATE_TIME,
+        s.UPDATE_TIME,
+        s.CITY_CODE,
+        s.ZIP_CODE,
+        s.PROVINCE_ID,
+        s.CITY_ID,
+        s.TOWN_ID,
+        s.PROVINCE_NAME,
+        s.CITY_NAME,
+        s.TOWN_NAME,
+        s.LC,
+        s.CI,
+        d.ID as 'DEVICE.ID',
+        d.SN as 'DEVICE.SN',
+        d.NAME as 'DEVICE.NAME',
+        d.TYPE,
+        d.BAND,
+        d.OPERATOR,
+        d.MANUFACTURER,
+        d.REMARK as 'DEVICE.REMARK',
+        d.CREATE_TIME,
+        d.UPDATE_TIME,
+        d.DELETE_FLAG
+    </sql>
+    
+    <select id="getSiteEntityList" parameterType="java.lang.Long" resultMap="baseResultMap">
+        select
+        <include refid="siteWithDeviceColumns" />
+        from t_site_user a, t_site s, t_device d
+        where a.user_id = #{userId,jdbcType=BIGINT} and s.id = a.site_id and s.id = d.site_id
+    </select>
+
+</mapper>

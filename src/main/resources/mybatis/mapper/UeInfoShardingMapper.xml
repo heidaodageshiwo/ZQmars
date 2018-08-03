@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.iekun.ef.dao.UeInfoShardingMapper">
+    <resultMap type="com.iekun.ef.model.UeInfo" id="BaseResultMap" >
+        <id column="ID" jdbcType="BIGINT" property="id" />
+        <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+        <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+        <result column="IMSI" jdbcType="VARCHAR" property="imsi" />
+        <result column="IMEI" jdbcType="VARCHAR" property="imei" />
+        <result column="STMSI" jdbcType="VARCHAR" property="stmsi" />
+        <result column="MAC" jdbcType="VARCHAR" property="mac" />
+        <result column="LATYPE" jdbcType="VARCHAR" property="latype" />
+        <result column="INDICATION" jdbcType="TINYINT" property="indication" />
+        <result column="REALTIME" jdbcType="BIT" property="realtime" />
+        <result column="CAPTURE_TIME" jdbcType="VARCHAR" property="captureTime" />
+        <result column="RARTA" jdbcType="BIGINT" property="rarta" />
+        <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+        <result column="CITY_NAME" jdbcType="VARCHAR" property="cityName" />
+        <result column="BAND" jdbcType="VARCHAR" property="band" />
+        <result column="OPERATOR" jdbcType="VARCHAR" property="operator" />
+        <result column="SITE_SN" jdbcType="VARCHAR" property="siteSn" />
+    </resultMap>
+    <sql id="Base_Column_List">
+        ID, SITE_NAME, DEVICE_SN, IMSI, IMEI, STMSI, MAC, LATYPE, INDICATION, REALTIME, CAPTURE_TIME,
+        RARTA, CREATE_TIME, CITY_NAME, BAND, OPERATOR, SITE_SN
+    </sql>
+
+    <update id="createUeInfoTab" parameterType="java.util.Map">
+       CREATE TABLE IF NOT EXISTS  `${tableName}`  (
+          `ID` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'Ue信息ID',
+          `SITE_NAME` varchar(40) DEFAULT NULL COMMENT '站点名称',
+          `DEVICE_SN` varchar(40) DEFAULT NULL COMMENT '子设备序列号',
+          `SITE_SN` varchar(40) DEFAULT NULL,
+          `IMSI` varchar(16) DEFAULT NULL COMMENT 'IMSI',
+          `IMEI` varchar(16) DEFAULT NULL COMMENT 'IMEI',
+          `STMSI` varchar(20) DEFAULT NULL COMMENT 'TMSI',
+          `MAC` varchar(20) DEFAULT NULL COMMENT 'MAC地址',
+          `LATYPE` varchar(4) DEFAULT NULL COMMENT '位置更新类型',
+          `INDICATION` tinyint(2) DEFAULT '0' COMMENT '是否目标手机：0 --- NORMAL；1--- 黑名单手机；2--- 特殊归属地手机',
+          `REALTIME` tinyint(1) DEFAULT '0' COMMENT '是否实时上报:00-  不实时上报;01-  实时上报',
+          `CAPTURE_TIME` varchar(20) CHARACTER SET utf8 COLLATE utf8_bin DEFAULT NULL COMMENT '基站侧记录的上号时间',
+          `RARTA` bigint(20) DEFAULT NULL,
+          `CREATE_TIME` varchar(14) DEFAULT NULL COMMENT '创建时间',
+          `CITY_NAME` varchar(100) DEFAULT NULL COMMENT '归属地地名',
+          `CITY_CODE` varchar(10) DEFAULT NULL,
+          `BAND` varchar(20) DEFAULT NULL COMMENT '频段',
+          `OPERATOR` varchar(20) DEFAULT NULL COMMENT '运营商',
+          PRIMARY KEY (`ID`),
+          KEY `DEVICE_SN` (`SITE_NAME`),
+          KEY `SUBDEVICE_SN` (`DEVICE_SN`),
+          KEY `IMSI` (`IMSI`)
+        ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='终端信息采集表';
+    </update>
+
+    <insert id="batchInsertShardingUeInfo"  parameterType="java.util.Map" >
+        insert into  `${tableName}` (SITE_NAME, DEVICE_SN,
+        IMSI, IMEI, STMSI,
+        MAC, LATYPE, INDICATION,
+        REALTIME, CAPTURE_TIME, RARTA,
+        CREATE_TIME, CITY_NAME, BAND,
+        OPERATOR,SITE_SN, CITY_CODE)
+        values
+        <foreach collection="ueInfos" item="item" index="index"  separator="," >
+            (#{item.siteName,jdbcType=VARCHAR}, #{item.deviceSn,jdbcType=VARCHAR},
+            #{item.imsi,jdbcType=VARCHAR}, #{item.imei,jdbcType=VARCHAR}, #{item.stmsi,jdbcType=VARCHAR},
+            #{item.mac,jdbcType=VARCHAR}, #{item.latype,jdbcType=VARCHAR}, #{item.indication,jdbcType=TINYINT},
+            #{item.realtime,jdbcType=BIT}, #{item.captureTime,jdbcType=VARCHAR}, #{item.rarta,jdbcType=BIGINT},
+            #{item.createTime,jdbcType=VARCHAR}, #{item.cityName,jdbcType=VARCHAR}, #{item.band,jdbcType=VARCHAR},
+            #{item.operator,jdbcType=VARCHAR},  #{item.siteSn,jdbcType=VARCHAR}
+            , #{item.cityCode,jdbcType=VARCHAR})
+        </foreach>
+    </insert>
+
+    <resultMap type="com.iekun.ef.model.UeInfo" id="HistoryResultMap" >
+        <id column="ID" jdbcType="BIGINT" property="id" />
+        <result column="SITE_NAME" jdbcType="VARCHAR" property="siteName" />
+        <result column="DEVICE_SN" jdbcType="VARCHAR" property="deviceSn" />
+        <result column="IMSI" jdbcType="VARCHAR" property="imsi" />
+        <result column="IMEI" jdbcType="VARCHAR" property="imei" />
+        <result column="STMSI" jdbcType="VARCHAR" property="stmsi" />
+        <result column="MAC" jdbcType="VARCHAR" property="mac" />
+        <result column="LATYPE" jdbcType="VARCHAR" property="latype" />
+        <result column="INDICATION" jdbcType="TINYINT" property="indication" />
+        <result column="REALTIME" jdbcType="BIT" property="realtime" />
+        <result column="CAPTURE_TIME" jdbcType="VARCHAR" property="captureTime" />
+        <result column="RARTA" jdbcType="BIGINT" property="rarta" />
+        <result column="CREATE_TIME" jdbcType="VARCHAR" property="createTime" />
+        <result column="CITY_NAME" jdbcType="VARCHAR" property="cityName" />
+        <result column="BAND" jdbcType="VARCHAR" property="band" />
+        <result column="OPERATOR" jdbcType="VARCHAR" property="operator" />
+        <result column="SITE_SN" jdbcType="VARCHAR" property="siteSn" />
+        <!-- device为UeInfo pojo中定义的变量 -->
+        <association property="device"  javaType="com.iekun.ef.model.Device">
+            <id property="id" column="DEVICE_ID" />
+            <result column="DEVICE_NAME" jdbcType="VARCHAR" property="name" />
+        </association>
+    </resultMap>
+
+    <select id="getShardingUeInfoCnt" parameterType="java.util.Map" resultType="java.lang.Long">
+        select
+        count(1)
+        from `${tableName}`
+    </select>
+
+    <select id="selectShardingUeInfoList" parameterType="java.util.Map" resultMap="HistoryResultMap">
+        select
+        TUI.ID,
+        TUI.SITE_NAME,
+        TUI.DEVICE_SN,
+        TUI.IMSI,
+        TUI.IMEI,
+        TUI.STMSI,
+        TUI.MAC,
+        TUI.LATYPE,
+        TUI.INDICATION,
+        TUI.REALTIME,
+        TUI.CAPTURE_TIME,
+        TUI.RARTA,
+        TUI.CREATE_TIME,
+        TUI.BAND,
+        TUI.OPERATOR,
+        TUI.CITY_NAME,
+        TUI.CITY_CODE,
+        TUI.SITE_SN,
+        TD.NAME as  DEVICE_NAME
+        from `${tableName}` TUI
+        left join t_device TD on TD.SN = TUI.DEVICE_SN AND TD.DELETE_FLAG = 0
+        where 1=1
+        <if test="start != null and length != null">
+            order by TUI.CAPTURE_TIME ASC
+            limit #{start}, #{length}
+        </if>
+    </select>
+    <select id="selectShardingUeInfoList1" parameterType="java.util.Map" resultMap="HistoryResultMap">
+        select
+        TUI.ID,
+        TUI.SITE_NAME,
+        TUI.DEVICE_SN,
+        TUI.IMSI,
+        TUI.IMEI,
+        TUI.STMSI,
+        TUI.MAC,
+        TUI.LATYPE,
+        TUI.INDICATION,
+        TUI.REALTIME,
+        TUI.CAPTURE_TIME,
+        TUI.RARTA,
+        TUI.CREATE_TIME,
+        TUI.BAND,
+        TUI.OPERATOR,
+        TUI.CITY_NAME,
+        TUI.CITY_CODE,
+        TUI.SITE_SN
+        from `${tableName}` TUI
+
+    </select>
+    <insert id="selectShardingAndInsertTempTab" parameterType="java.util.Map" >
+        INSERT INTO `${tempTableName}` (SITE_NAME, DEVICE_SN, SITE_SN, IMSI, IMEI, STMSI,MAC,LATYPE,INDICATION, REALTIME, CAPTURE_TIME, RARTA,CREATE_TIME,CITY_NAME, CITY_CODE, BAND,OPERATOR)
+        SELECT SITE_NAME, DEVICE_SN, SITE_SN, IMSI, IMEI, STMSI,MAC,LATYPE,INDICATION, REALTIME, CAPTURE_TIME, RARTA,CREATE_TIME,CITY_NAME, CITY_CODE, BAND,OPERATOR FROM `${shardingTabName}` TUI
+        where SITE_SN in ( select SN from t_site TS
+         left join t_site_user TSU on TSU.SITE_ID = TS.ID
+        where TSU.USER_ID = #{userId} AND TSU.DELETE_FLAG =0)
+            <if test="imsi != null and imsi!=''">
+                AND TUI.IMSI = #{imsi}
+            </if>
+            <if test="deviceSn != null and deviceSn!='' ">
+                AND TUI.DEVICE_SN = #{deviceSn}
+            </if>
+            <if test="siteSn != null and siteSn!='' ">
+                AND TUI.SITE_SN = #{siteSn}
+            </if>
+            <if test="homeOwnership != null and homeOwnership!='' ">
+                AND TUI.CITY_CODE = #{homeOwnership}
+            </if>
+            <if test="operator != null and operator!='' ">
+                AND TUI.OPERATOR = #{operator}
+            </if>
+            <if test="startTime != null and startTime!=''">
+                AND TUI.CAPTURE_TIME <![CDATA[ >= ]]> #{startTime}
+            </if>
+            <if test="endTime != null and endTime!='' ">
+                AND  #{endTime}  <![CDATA[ >= ]]> TUI.CAPTURE_TIME
+            </if>
+    </insert>
+
+</mapper>
